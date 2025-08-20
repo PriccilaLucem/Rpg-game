@@ -3,6 +3,7 @@
 
 #define MAX_DESCRIPTION_LENGTH 200
 #define MAX_NAME_LENGTH 20
+#define PATH_TO_MENU_FONT "src/assets/fonts/Luckiest_Guy,Playfair_Display/Luckiest_Guy/LuckiestGuy-Regular.ttf"
 
 typedef enum itens_type {
     ITEM_WEAPON,      
