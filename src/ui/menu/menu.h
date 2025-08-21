@@ -18,11 +18,8 @@ typedef struct {
 } Menu;
 
 Menu* init_menu(int screen_width, int screen_height, int font_size);
-void render_menu_title(Menu* menu, SDL_Renderer* renderer, const char* title_text);
-void handle_start_button();
-void handle_option_button();
-void handle_exit_button();
-void handle_load_game_button();
-
+void render_menu(Menu* menu, SDL_Renderer* renderer);
+void handle_menu_input(Menu* menu, SDL_Event* event);
+void destroy_menu(Menu* menu);
 
 #endif

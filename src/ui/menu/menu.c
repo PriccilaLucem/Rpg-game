@@ -1,17 +1,17 @@
 #include "menu.h"
 #include <stdio.h>
 
-void handle_start_button(){
+static void handle_start_button(){
     printf("Start button");
 }
-void handle_option_button(){
+static void handle_option_button(){
     printf("Option button");
 }
-void handle_exit_button(){
+static void handle_exit_button(){
     printf("exiting game");
     exit(0);
 }
-void handle_load_game_button(){
+static void handle_load_game_button(){
     printf("loading game");
 }
 
@@ -87,7 +87,7 @@ Menu* init_menu(int screen_width, int screen_height, int font_size) {
     return menu;
 }
 
-void render_menu_title(Menu* menu, SDL_Renderer* renderer, const char* title_text) {
+static void render_menu_title(Menu* menu, SDL_Renderer* renderer, const char* title_text) {
     SDL_Color color = {255, 255, 255, 255}; // White color
     SDL_Surface* surface = TTF_RenderText_Solid(menu->title, title_text, color);
     if (surface) {
@@ -103,3 +103,79 @@ void render_menu_title(Menu* menu, SDL_Renderer* renderer, const char* title_tex
     }
 }
 
+void render_menu(Menu* menu, SDL_Renderer* renderer){
+    if(!menu || !renderer){
+        exit(EXIT_FAILURE);
+    }
+
+    render_menu_title(menu, renderer, "Game menu");
+
+    render_button(menu->start_game, renderer);
+    render_button(menu->load_game,renderer);
+    render_button(menu->options,renderer);
+    render_button(menu->exit,renderer);
+}
+
+
+
+void handle_menu_input(Menu* menu, SDL_Event* event) {
+
+    if (!menu || !event) return;
+    
+    int mouse_x, mouse_y;
+    
+    switch (event->type) {
+        case SDL_MOUSEMOTION:
+            mouse_x = event->motion.x;
+            mouse_y = event->motion.y;
+            
+            // Check hover state for all buttons
+            check_button_hover(menu->start_game, mouse_x, mouse_y);
+            check_button_hover(menu->load_game, mouse_x, mouse_y);
+            check_button_hover(menu->options, mouse_x, mouse_y);
+            check_button_hover(menu->exit, mouse_x, mouse_y);
+            break;
+            
+        case SDL_MOUSEBUTTONDOWN:
+            if (event->button.button == SDL_BUTTON_LEFT) {
+                mouse_x = event->button.x;
+                mouse_y = event->button.y;
+                
+                // Check click for all buttons
+                if (check_button_click(menu->start_game, mouse_x, mouse_y) && menu->start_game->onClick) {
+                    menu->start_game->onClick();
+                }
+                if (check_button_click(menu->load_game, mouse_x, mouse_y) && menu->load_game->onClick) {
+                    menu->load_game->onClick();
+                }
+                if (check_button_click(menu->options, mouse_x, mouse_y) && menu->options->onClick) {
+                    menu->options->onClick();
+                }
+                if (check_button_click(menu->exit, mouse_x, mouse_y) && menu->exit->onClick) {
+                    menu->exit->onClick();
+                }
+            }
+            break;
+            
+        case SDL_MOUSEBUTTONUP:
+            if (event->button.button == SDL_BUTTON_LEFT) {
+                // Reset click state for all buttons
+                if (menu->start_game) menu->start_game->isClicked = false;
+                if (menu->load_game) menu->load_game->isClicked = false;
+                if (menu->options) menu->options->isClicked = false;
+                if (menu->exit) menu->exit->isClicked = false;
+            }
+            break;
+    }
+}
+
+void destroy_menu(Menu* menu) {
+    if (menu) {
+        if (menu->title) TTF_CloseFont(menu->title);
+        if (menu->start_game) destroy_button(menu->start_game);
+        if (menu->load_game) destroy_button(menu->load_game);
+        if (menu->options) destroy_button(menu->options);
+        if (menu->exit) destroy_button(menu->exit);
+        free(menu);
+    }
+}

@@ -24,4 +24,9 @@ typedef struct {
 Button* init_button(int x, int y, int width, int height,
      const char* label, bool isClicked, bool isHovered, TTF_Font* font);
 
+void render_button(Button* button, SDL_Renderer* renderer);
+void check_button_hover(Button* button, int mouse_x, int mouse_y);
+bool check_button_click(Button* button, int mouse_x, int mouse_y);
+void destroy_button(Button* button);
+
 #endif
