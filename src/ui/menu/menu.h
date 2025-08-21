@@ -3,12 +3,26 @@
 
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include "../button/button.h"
 
-#define PATH_TO_FONT "src/assets/fonts/Luckiest_Guy,Playfair_Display/Luckiest_Guy/LuckiestGuy-Regular.ttf"
 
-void render_text(SDL_Renderer* renderer, TTF_Font* font, const char* text, int x, int y, SDL_Color color);
-void button_action(int button_id);
-void render_menu(SDL_Renderer* renderer, TTF_Font* font);
-void handle_menu_events(SDL_Event* event, int* running, int* game_state);
+typedef struct {
+    TTF_Font* title;
+    int font_size;
+    int screen_size_h;
+    int screen_size_w;
+    Button* start_game;
+    Button* load_game;
+    Button* options;
+    Button* exit;
+} Menu;
+
+Menu* init_menu(int screen_width, int screen_height, int font_size);
+void render_menu_title(Menu* menu, SDL_Renderer* renderer, const char* title_text);
+void handle_start_button();
+void handle_option_button();
+void handle_exit_button();
+void handle_load_game_button();
+
 
 #endif

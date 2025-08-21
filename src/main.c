@@ -18,12 +18,13 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
         SDL_Quit();
         return 1;
     }
+    Menu* menu = init_menu(600, 400, 20);
 
     // Create window
     SDL_Window* window = SDL_CreateWindow("SDL2 Game",
                                         SDL_WINDOWPOS_CENTERED,
                                         SDL_WINDOWPOS_CENTERED,
-                                        800, 600,
+                                        menu->screen_size_w, menu->screen_size_h,
                                         SDL_WINDOW_SHOWN);
     if (!window) {
         SDL_Log("Window creation failed: %s", SDL_GetError());
@@ -42,48 +43,18 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
         return 1;
     }
 
-    // Load font
-    TTF_Font* font = TTF_OpenFont(PATH_TO_FONT, 24);
-    if (!font) {
-        SDL_Log("Failed to load font: %s", TTF_GetError());
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        TTF_Quit();
-        SDL_Quit();
-        return 1;
-    }
+
 
     // Main game loop
     int running = 1;
-    int game_state = 0; // 0 = menu, 1 = game
     
+
     while (running) {
-        SDL_Event event;
-        
-        if (game_state == 0) {
-            // Menu state
-            handle_menu_events(&event, &running, &game_state);
-            render_menu(renderer, font);
-        }
-        else {
-            // Game state
-            while (SDL_PollEvent(&event)) {
-                if (event.type == SDL_QUIT) {
-                    running = 0;
-                }
-            }
-            
-            // Game rendering would go here
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-            SDL_RenderClear(renderer);
-            SDL_RenderPresent(renderer);
-        }
-        
-        SDL_Delay(16);
+        SDL_Event event;    
+        render_menu_title(menu, renderer, "MENU TITLE");
     }
 
     // Cleanup
-    TTF_CloseFont(font);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     TTF_Quit();

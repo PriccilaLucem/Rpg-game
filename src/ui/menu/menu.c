@@ -1,83 +1,105 @@
 #include "menu.h"
 #include <stdio.h>
 
-void render_text(SDL_Renderer* renderer, TTF_Font* font, const char* text, int x, int y, SDL_Color color) {
-    SDL_Surface* surface = TTF_RenderText_Blended(font, text, color);
-    if (!surface) {
-        printf("Failed to render text: %s\n", TTF_GetError());
-        return;
+void handle_start_button(){
+    printf("Start button");
+}
+void handle_option_button(){
+    printf("Option button");
+}
+void handle_exit_button(){
+    printf("exiting game");
+    exit(0);
+}
+void handle_load_game_button(){
+    printf("loading game");
+}
+
+Menu* init_menu(int screen_width, int screen_height, int font_size) {
+    Menu* menu = malloc(sizeof(Menu));
+    if (menu == NULL) {
+        return NULL;
     }
     
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-    if (!texture) {
-        printf("Failed to create texture: %s\n", SDL_GetError());
+    menu->screen_size_w = screen_width;
+    menu->screen_size_h = screen_height;
+    menu->font_size = font_size;
+    
+    menu->title = TTF_OpenFont(MENU_FONT_PATH, font_size * 2); // Title font is larger
+    
+    if (menu->title == NULL) {
+        printf("Failed to load title font: %s\n", TTF_GetError());
+        free(menu);
+        return NULL;
+    }
+    
+    TTF_Font* button_font = TTF_OpenFont(MENU_FONT_PATH, font_size);
+    if (button_font == NULL) {
+        printf("Failed to load button font: %s\n", TTF_GetError());
+        TTF_CloseFont(menu->title);
+        free(menu);
+        return NULL;
+    }
+    
+    int button_width = screen_width / 4;
+    int button_height = 60;
+    int button_spacing = 20;
+    int total_menu_height = (button_height * 4) + (button_spacing * 3);
+    int start_y = (screen_height - total_menu_height) / 2;
+    int start_x = (screen_width - button_width) / 2;
+    
+    // Initialize buttons
+    int current_y = start_y;
+    
+    menu->start_game = init_button(start_x, current_y, button_width, button_height, 
+                                  "Start Game", false, false, button_font);
+    menu->start_game->onClick = handle_start_button;
+    current_y += button_height + button_spacing;
+    
+    menu->load_game = init_button(start_x, current_y, button_width, button_height, 
+                                 "Load Game", false, false, button_font);
+    menu->load_game->onClick = handle_load_game_button;
+    
+    current_y += button_height + button_spacing;
+    
+    menu->options = init_button(start_x, current_y, button_width, button_height, 
+                               "Options", false, false, button_font);
+    menu->options->onClick = handle_option_button;
+    
+    current_y += button_height + button_spacing;
+    
+    menu->exit = init_button(start_x, current_y, button_width, button_height, 
+                            "Exit", false, false, button_font);
+    
+    menu->exit->onClick = handle_exit_button;
+
+    if (!menu->start_game || !menu->load_game || !menu->options || !menu->exit) {
+        TTF_CloseFont(menu->title);
+        TTF_CloseFont(button_font);
+        if (menu->start_game) free(menu->start_game);
+        if (menu->load_game) free(menu->load_game);
+        if (menu->options) free(menu->options);
+        if (menu->exit) free(menu->exit);
+        free(menu);
+        return NULL;
+    }
+    
+    return menu;
+}
+
+void render_menu_title(Menu* menu, SDL_Renderer* renderer, const char* title_text) {
+    SDL_Color color = {255, 255, 255, 255}; // White color
+    SDL_Surface* surface = TTF_RenderText_Solid(menu->title, title_text, color);
+    if (surface) {
+        SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+        if (texture) {
+            int title_x = (menu->screen_size_w - surface->w) / 2;
+            int title_y = (menu->screen_size_h / 4) - (surface->h / 2);
+            SDL_Rect dstrect = {title_x, title_y, surface->w, surface->h};
+            SDL_RenderCopy(renderer, texture, NULL, &dstrect);
+            SDL_DestroyTexture(texture);
+        }
         SDL_FreeSurface(surface);
-        return;
-    }
-    
-    SDL_Rect rect = {x, y, surface->w, surface->h};
-    SDL_RenderCopy(renderer, texture, NULL, &rect);
-    
-    SDL_FreeSurface(surface);
-    SDL_DestroyTexture(texture);
-}
-
-void button_action(int button_id) {
-    // Implement specific button actions
-    switch(button_id) {
-        case 0: // Start Game
-            printf("Starting game...\n");
-            break;
-        case 1: // Options
-            printf("Opening options...\n");
-            break;
-        case 2: // Exit
-            printf("Exiting game...\n");
-            break;
     }
 }
 
-void render_menu(SDL_Renderer* renderer, TTF_Font* font) {
-    SDL_Color white = {255, 255, 255, 255};
-    SDL_Color red = {255, 0, 0, 255};
-    
-    // Clear screen
-    SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
-    SDL_RenderClear(renderer);
-    
-    // Render menu items
-    render_text(renderer, font, "Main Menu", 300, 50, white);
-    render_text(renderer, font, "Start Game", 350, 200, white);
-    render_text(renderer, font, "Options", 350, 250, white);
-    render_text(renderer, font, "Exit", 350, 300, red);
-    
-    SDL_RenderPresent(renderer);
-}   
-
-void handle_menu_events(SDL_Event* event, int* running, int* game_state) {
-    while (SDL_PollEvent(event)) {
-        if (event->type == SDL_QUIT) {
-            *running = 0;
-        }
-        
-        if (event->type == SDL_MOUSEBUTTONDOWN) {
-            int x = event->button.x;
-            int y = event->button.y;
-            
-            // Check button clicks (simplified example)
-            if (x >= 350 && x <= 450) {
-                if (y >= 200 && y <= 220) { // Start Game
-                    *game_state = 1; // Switch to game state
-                    button_action(0);
-                }
-                else if (y >= 250 && y <= 270) { // Options
-                    button_action(1);
-                }
-                else if (y >= 300 && y <= 320) { // Exit
-                    *running = 0;
-                    button_action(2);
-                }
-            }
-        }
-    }
-}

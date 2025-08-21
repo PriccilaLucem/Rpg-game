@@ -26,7 +26,7 @@ basicCharacter* init_basic_character_as_main(
     bc->class = class;
     bc->equipped_armors = init_equipped_armors();
 
-    bc->Characters.MainCharacter = init_main_character(bc->id, bc->name, 100, 10);
+    bc->Characters.MainCharacter = init_main_character(bc->id, 100, 10);
 
     return bc;
 }

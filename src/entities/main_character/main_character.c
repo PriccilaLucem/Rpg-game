@@ -1,7 +1,7 @@
 #include "./main_character.h"
 #include <stdlib.h>
 
-MainCharacter* init_main_character(char* name, int max_weight, size_t button_size){
+MainCharacter* init_main_character(int max_weight, size_t button_size){
     MainCharacter* main_character = malloc(sizeof(MainCharacter));
     
     main_character->id = get_num_state();
