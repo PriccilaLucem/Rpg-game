@@ -3,6 +3,7 @@
 basicCharacter* init_basic_character_as_main(
     const char* name,
     const char* description,
+    const char* path_to_img,
     Attributes* attributes,
     Race* race,
     Class* class
@@ -17,6 +18,9 @@ basicCharacter* init_basic_character_as_main(
 
     strncpy(bc->name, name, MAX_NAME_LENGTH - 1);
     bc->name[MAX_NAME_LENGTH - 1] = '\0';
+
+    strcpy(bc->path_to_image, path_to_img, 50);
+    bc->path_to_image[50 - 1] = '\0'; 
 
     strncpy(bc->description, description, MAX_DESCRIPTION_LENGTH - 1);
     bc->description[MAX_DESCRIPTION_LENGTH - 1] = '\0';

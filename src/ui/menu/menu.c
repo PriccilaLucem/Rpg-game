@@ -119,55 +119,86 @@ void render_menu(Menu* menu, SDL_Renderer* renderer){
 
 
 void handle_menu_input(Menu* menu, SDL_Event* event) {
-
     if (!menu || !event) return;
-    
+
     int mouse_x, mouse_y;
-    
+    int total_buttons = 4; // start, load, options, exit
+
     switch (event->type) {
+        // ---------------- MOUSE ----------------
         case SDL_MOUSEMOTION:
             mouse_x = event->motion.x;
             mouse_y = event->motion.y;
-            
-            // Check hover state for all buttons
+
             check_button_hover(menu->start_game, mouse_x, mouse_y);
             check_button_hover(menu->load_game, mouse_x, mouse_y);
             check_button_hover(menu->options, mouse_x, mouse_y);
             check_button_hover(menu->exit, mouse_x, mouse_y);
             break;
-            
+
         case SDL_MOUSEBUTTONDOWN:
             if (event->button.button == SDL_BUTTON_LEFT) {
                 mouse_x = event->button.x;
                 mouse_y = event->button.y;
-                
-                // Check click for all buttons
-                if (check_button_click(menu->start_game, mouse_x, mouse_y) && menu->start_game->onClick) {
+
+                if (check_button_click(menu->start_game, mouse_x, mouse_y) && menu->start_game->onClick)
                     menu->start_game->onClick();
-                }
-                if (check_button_click(menu->load_game, mouse_x, mouse_y) && menu->load_game->onClick) {
+                if (check_button_click(menu->load_game, mouse_x, mouse_y) && menu->load_game->onClick)
                     menu->load_game->onClick();
-                }
-                if (check_button_click(menu->options, mouse_x, mouse_y) && menu->options->onClick) {
+                if (check_button_click(menu->options, mouse_x, mouse_y) && menu->options->onClick)
                     menu->options->onClick();
-                }
-                if (check_button_click(menu->exit, mouse_x, mouse_y) && menu->exit->onClick) {
+                if (check_button_click(menu->exit, mouse_x, mouse_y) && menu->exit->onClick)
                     menu->exit->onClick();
-                }
             }
             break;
-            
+
         case SDL_MOUSEBUTTONUP:
             if (event->button.button == SDL_BUTTON_LEFT) {
-                // Reset click state for all buttons
                 if (menu->start_game) menu->start_game->isClicked = false;
-                if (menu->load_game) menu->load_game->isClicked = false;
-                if (menu->options) menu->options->isClicked = false;
-                if (menu->exit) menu->exit->isClicked = false;
+                if (menu->load_game)  menu->load_game->isClicked = false;
+                if (menu->options)    menu->options->isClicked = false;
+                if (menu->exit)       menu->exit->isClicked = false;
             }
             break;
+
+        // ---------------- KEYBOARD ----------------
+        case SDL_KEYDOWN:
+            switch (event->key.keysym.sym) {
+            case SDLK_UP:
+                menu->selected_index--;
+                if (menu->selected_index < 0)
+                    menu->selected_index = 3; // último botão
+                break;
+
+            case SDLK_DOWN:
+                menu->selected_index++;
+                if (menu->selected_index > 3)
+                    menu->selected_index = 0; // primeiro botão
+                break;
+
+            case SDLK_RETURN:
+            case SDLK_SPACE:
+                if (menu->selected_index == 0 && menu->start_game->onClick)
+                    menu->start_game->onClick();
+                else if (menu->selected_index == 1 && menu->load_game->onClick)
+                    menu->load_game->onClick();
+                else if (menu->selected_index == 2 && menu->options->onClick)
+                    menu->options->onClick();
+                else if (menu->selected_index == 3 && menu->exit->onClick)
+                    menu->exit->onClick();
+                break;
+        }
+
+    // Atualiza o "hover" baseado no índice
+    menu->start_game->isHovered = (menu->selected_index == 0);
+    menu->load_game->isHovered  = (menu->selected_index == 1);
+    menu->options->isHovered    = (menu->selected_index == 2);
+    menu->exit->isHovered       = (menu->selected_index == 3);
+    break;
+
     }
 }
+
 
 void destroy_menu(Menu* menu) {
     if (menu) {

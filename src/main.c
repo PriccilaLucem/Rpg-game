@@ -27,6 +27,7 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
                 running = 0;
             }
             handle_menu_input(menu, &screen->event);
+            
         }
 
         // Clear screen

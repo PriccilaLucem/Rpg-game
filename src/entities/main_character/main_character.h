@@ -18,6 +18,6 @@ typedef struct main_character
 
 } MainCharacter;
 
-MainCharacter* init_main_character(int max_weight, size_t button_size);
+MainCharacter* init_main_character(int id, int max_weight, size_t button_size);
 
 #endif
