@@ -5,8 +5,12 @@
 #include <SDL_ttf.h>
 #include "../button/button.h"
 #include "../../input/input.h"
+#include "../button/button.h"
+#include "../../constants/constants.h"
+#include "../../states/states.h"
 
 typedef struct Menu {
+    int id;
     TTF_Font* title;
     int selected_index;
     int font_size;
@@ -22,6 +26,7 @@ typedef struct Menu {
 Menu* init_menu(int screen_width, int screen_height, int font_size);
 void render_menu(Menu* menu, SDL_Renderer* renderer);
 void handle_menu_input(Menu* menu, SDL_Event* event);
-void destroy_menu(Menu* menu);
-
+void free_main_menu(Menu* menu);
+void update_main_menu(Menu* menu);
+void handle_menu_input(Menu* menu, SDL_Event* event);
 #endif

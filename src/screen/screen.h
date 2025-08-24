@@ -3,7 +3,7 @@
 
 #include <SDL.h>
 #include <SDL_ttf.h>
-#include "../states/states.h"
+#include "../constants/constants.h"
 
 typedef struct InitialScreen
 {

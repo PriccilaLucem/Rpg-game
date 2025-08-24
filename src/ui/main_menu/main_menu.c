@@ -1,14 +1,15 @@
-#include "menu.h"
+#include "main_menu.h"
 #include <stdio.h>
 
 static void handle_start_button(){
     printf("Start button");
 }
 static void handle_option_button(){
-    printf("Option button");
+    printf("opening options");
 }
 static void handle_exit_button(){
     printf("exiting game");
+    change_state(STATE_EXIT);
     exit(0);
 }
 static void handle_load_game_button(){
@@ -20,7 +21,7 @@ Menu* init_menu(int screen_width, int screen_height, int font_size) {
     if (menu == NULL) {
         return NULL;
     }
-    
+    menu->id = get_id_gen();
     menu->screen_size_w = screen_width;
     menu->screen_size_h = screen_height;
     menu->font_size = font_size;
@@ -199,14 +200,18 @@ void handle_menu_input(Menu* menu, SDL_Event* event) {
     }
 }
 
+void update_main_menu(Menu* menu) {
+    // Placeholder for future updates (animations, etc.)
+    // Currently, no dynamic elements to update
+}
 
-void destroy_menu(Menu* menu) {
+void free_main_menu(Menu* menu) {
     if (menu) {
         if (menu->title) TTF_CloseFont(menu->title);
-        if (menu->start_game) destroy_button(menu->start_game);
-        if (menu->load_game) destroy_button(menu->load_game);
-        if (menu->options) destroy_button(menu->options);
-        if (menu->exit) destroy_button(menu->exit);
+        if (menu->start_game) free_button(menu->start_game);
+        if (menu->load_game) free_button(menu->load_game);
+        if (menu->options) free_button(menu->options);
+        if (menu->exit) free_button(menu->exit);
         free(menu);
     }
 }

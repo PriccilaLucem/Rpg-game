@@ -1,4 +1,4 @@
-#include "button.h"
+#include "./button.h"
 
 Button* init_button(int x, int y, int width, int height,
      const char* label, bool isClicked, bool isHovered, TTF_Font* font) {
@@ -19,6 +19,8 @@ Button* init_button(int x, int y, int width, int height,
     button->isClicked = isClicked;
     button->font = font;
     button->onClick = NULL;
+    button->texture = NULL;
+    button->rect = (SDL_Rect){x, y, width, height};
     
     return button;
 }
@@ -85,8 +87,30 @@ bool check_button_click(Button* button, int mouse_x, int mouse_y) {
     return false;
 }
 
+void render_arrow_button(SDL_Renderer* renderer, int x, int y, int size, int direction) {
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    
+    SDL_Point points[4];
+    
+    switch(direction) {
+        case ARROW_LEFT:
+            points[0] = (SDL_Point){x + size, y};
+            points[1] = (SDL_Point){x, y + size/2};
+            points[2] = (SDL_Point){x + size, y + size};
+            points[3] = (SDL_Point){x + size, y}; 
+            break;
+            
+        case ARROW_RIGHT:
+            points[0] = (SDL_Point){x, y};
+            points[1] = (SDL_Point){x + size, y + size/2};
+            points[2] = (SDL_Point){x, y + size};
+            points[3] = (SDL_Point){x, y};
+            break;
 
-void destroy_button(Button* button){
+    }
+}
+
+    void free_button(Button* button){
     if(button){
         free(button);
     }
