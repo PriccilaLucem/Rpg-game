@@ -43,7 +43,7 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
     renderer = screen->renderer;
     window = screen->window;
     main_menu = init_menu(SCREEN_W, SCREEN_H,  24);
-    options = init_options(0, 0, SCREEN_W, SCREEN_H, screen->renderer);
+    options = init_options(SCREEN_W, SCREEN_H, screen->renderer, 24);
     if (!main_menu || !options) {
         fprintf(stderr, "Failed to initialize main menu or options\n");
         screen->clear(screen);

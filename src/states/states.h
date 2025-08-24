@@ -12,6 +12,7 @@ typedef struct Options Options;
 extern Menu* main_menu;
 extern GameState current_state;
 extern Options* options;
+extern SDL_Window* window;
 
 int get_id_gen();
 void change_state(GameState new_state);

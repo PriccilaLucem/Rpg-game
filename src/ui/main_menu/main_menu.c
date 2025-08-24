@@ -27,7 +27,7 @@ Menu* init_menu(int screen_width, int screen_height, int font_size) {
     menu->screen_size_h = screen_height;
     menu->font_size = font_size;
     
-    menu->title = TTF_OpenFont(MENU_FONT_PATH, font_size * 2); // Title font is larger
+    menu->title = TTF_OpenFont(MENU_FONT_PATH, font_size * 2); 
     
     if (menu->title == NULL) {
         printf("Failed to load title font: %s\n", TTF_GetError());

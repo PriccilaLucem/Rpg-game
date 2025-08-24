@@ -29,26 +29,19 @@ Button* init_button(int x, int y, int width, int height,
 void render_button(Button* button, SDL_Renderer* renderer) {
     if (!button || !renderer) return;
     
-    // Create button background
     SDL_Rect button_rect = {button->x, button->y, button->width, button->height};
     
-    // Set button color based on state
     if (button->isHovered) {
-        SDL_SetRenderDrawColor(renderer, 100, 100, 200, 255); // Blue when hovered
-    } else if (button->isClicked) {
-        SDL_SetRenderDrawColor(renderer, 200, 100, 100, 255); // Red when clicked
+        SDL_SetRenderDrawColor(renderer, 100, 100, 200, 255); 
     } else {
-        SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255); // Gray normal state
+        SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255); 
     }
     
-    // Draw button background
     SDL_RenderFillRect(renderer, &button_rect);
     
-    // Draw button border
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderDrawRect(renderer, &button_rect);
     
-    // Render button text
     if (button->font) {
         SDL_Color text_color = {255, 255, 255, 255};
         SDL_Surface* text_surface = TTF_RenderText_Solid(button->font, button->label, text_color);

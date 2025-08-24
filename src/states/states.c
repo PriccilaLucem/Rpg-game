@@ -7,7 +7,6 @@
 
 int  id_generator = 0;
 
-
 int get_id_gen() {
     return id_generator++;
 }
@@ -49,11 +48,14 @@ void update_state(Menu* main_menu, Options* options) {
 void render_state(SDL_Renderer* renderer, Menu* main_menu, Options* options) {
     switch (current_state) {
         case STATE_MAIN_MENU:
+        
             if (main_menu) render_menu(main_menu, renderer);
             break;
 
         case STATE_OPTIONS:
-            if(options) render_options(options, renderer);
+            int current_width, current_height;
+            SDL_GetWindowSize(window, &current_width, &current_height);
+            if(options) render_options(options, renderer, current_width);
         case STATE_EXIT:
             break;
     }

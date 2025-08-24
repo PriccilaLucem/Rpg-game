@@ -1,31 +1,35 @@
-// options.h
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
 #include <SDL.h>
 #include <SDL_ttf.h>
-#include "../../config/config.h"
 #include "../button/button.h"
-#include "../../constants/constants.h"
-#include "../../states/states.h"
+#include "../../config/config.h"
 
-extern Config* current_config;
-extern SDL_Window* window;
-extern SDL_Renderer* renderer;
+typedef struct {
+    Button* button;
+    const char* format;
+    union {
+        const char* string_value;
+        int int_value;
+    };
+    int value_type;
+} ButtonConfig;
+
+#define STRING_VALUE 0
+#define INT_VALUE 1
 
 typedef struct Options {
-    int id;
-    TTF_Font* font;
     Config* config;
-    
+    TTF_Font* screen_title_font;
+    TTF_Font* button_font;
     SDL_Renderer* renderer;
-    // Screen title
-    char* screen_title;
+    SDL_Texture* texture;
     
-    // Option buttons
+    // Left column buttons
     Button* screen_size_left_arrow;
-    Button* screen_size_right_arrow;
     Button* screen_size;
+    Button* screen_size_right_arrow;
     Button* full_screen;
     Button* vsync;
     Button* sound;
@@ -34,26 +38,22 @@ typedef struct Options {
     Button* music_volume;
     Button* effects_volume;
     Button* voice_volume;
+    
+    // Right column buttonsX
     Button* save;
     Button* load;
     Button* reset;
     Button* back_to_main_menu;
 } Options;
 
-Options* init_options(int x, int y, int width, int height, SDL_Renderer* renderer);
+// Public functions
+Options* init_options(int width, int height, SDL_Renderer* renderer, int font_size);
 void free_options(Options* options);
-void handle_options_input(SDL_Event* event, Options* options);
-void render_options(Options* options, SDL_Renderer* renderer);
-void update_screen_size_button_text(Options* options, SDL_Renderer* renderer);
-void apply_resolution(Options* options);
-SDL_Texture* create_text_texture(SDL_Renderer* renderer, TTF_Font* font, const char* text, SDL_Color color);
 void update_options(Options* options);
-void screen_size_left_arrow_onClick(void* data);
-void screen_size_right_arrow_onClick(void* data);
-void update_state(Menu* main_menu, Options* options);
-void cleanup_states(Menu* main_menu, Options* options);
-void change_state(GameState new_state);
+void update_screen_size_button_text(Options* options, SDL_Renderer* renderer);
+void handle_options_input(SDL_Event* event, Options* options);
+void render_options(Options* options, SDL_Renderer* renderer, int screen_width);
 void apply_resolution(Options* options);
-void render_options(Options* options, SDL_Renderer* renderer);
+void update_button_geometry(Options* options, int screen_width, int screen_height);
 
 #endif
