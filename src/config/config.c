@@ -5,21 +5,26 @@
 
 Config* load_config(){
     Config* config = malloc(sizeof(Config));
-    if(config = NULL){
+    if(config == NULL){
+        printf("Failed to allocate memory for Config\n");
         exit(EXIT_FAILURE);
     }
     FILE* file = fopen("config.conf", "r");
     if(file == NULL){
         perror("Could not open config file");
         free(config);
+        printf("Using default configuration\n");
         exit(EXIT_FAILURE);
     }
     char key[50];
     char value[50];
     while(fscanf(file, "%49[^=]=%49[^\n]\n", key, value) == 2){
-        if(strcmp(key, "screen_width") == 0){
+        printf("Read config: %s = %s\n", key, value);
+        if(strcmp(key, "window_width") == 0){
+            printf("CONFIG WIDTH");
             config->screen_width = atoi(value);
-        } else if(strcmp(key, "screen_height") == 0){
+        } else if(strcmp(key, "window_height") == 0){
+            printf("CONFIG HEIGHT");
             config->screen_height = atoi(value);
         } else if(strcmp(key, "fullscreen") == 0){
             config->fullscreen = (strcmp(value, "true") == 0);

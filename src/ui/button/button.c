@@ -4,6 +4,7 @@ Button* init_button(int x, int y, int width, int height,
      const char* label, bool isClicked, bool isHovered, TTF_Font* font) {
     Button* button = malloc(sizeof(Button));
     if (button == NULL) {
+        fprintf(stderr, "Failed to allocate memory for Button\n");
         return NULL;
     }
     

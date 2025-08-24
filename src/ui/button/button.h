@@ -20,7 +20,8 @@ typedef struct Button{
     TTF_Font* font;
     SDL_Rect rect;
     SDL_Texture* texture;
-    void (*onClick)(void);
+    void (*onClick)(void*);
+    void* onClickData;
 } Button;
 
 Button* init_button(int x, int y, int width, int height,

@@ -1,18 +1,19 @@
 #include "main_menu.h"
 #include <stdio.h>
 
-static void handle_start_button(){
+static void handle_start_button(void* data){
     printf("Start button");
 }
-static void handle_option_button(){
+static void handle_option_button(void* data){
+    change_state(STATE_OPTIONS);
     printf("opening options");
 }
-static void handle_exit_button(){
+static void handle_exit_button(void* data){
     printf("exiting game");
     change_state(STATE_EXIT);
     exit(0);
 }
-static void handle_load_game_button(){
+static void handle_load_game_button(void* data){
     printf("loading game");
 }
 
@@ -106,6 +107,7 @@ static void render_menu_title(Menu* menu, SDL_Renderer* renderer, const char* ti
 
 void render_menu(Menu* menu, SDL_Renderer* renderer){
     if(!menu || !renderer){
+        printf("Menu or renderer is NULL\n");
         exit(EXIT_FAILURE);
     }
 
@@ -143,13 +145,13 @@ void handle_menu_input(Menu* menu, SDL_Event* event) {
                 mouse_y = event->button.y;
 
                 if (check_button_click(menu->start_game, mouse_x, mouse_y) && menu->start_game->onClick)
-                    menu->start_game->onClick();
+                    menu->start_game->onClick(menu);
                 if (check_button_click(menu->load_game, mouse_x, mouse_y) && menu->load_game->onClick)
-                    menu->load_game->onClick();
+                    menu->load_game->onClick(menu);
                 if (check_button_click(menu->options, mouse_x, mouse_y) && menu->options->onClick)
-                    menu->options->onClick();
+                    menu->options->onClick(menu);
                 if (check_button_click(menu->exit, mouse_x, mouse_y) && menu->exit->onClick)
-                    menu->exit->onClick();
+                    menu->exit->onClick(menu);
             }
             break;
 
@@ -180,13 +182,13 @@ void handle_menu_input(Menu* menu, SDL_Event* event) {
             case SDLK_RETURN:
             case SDLK_SPACE:
                 if (menu->selected_index == 0 && menu->start_game->onClick)
-                    menu->start_game->onClick();
+                    menu->start_game->onClick(menu);
                 else if (menu->selected_index == 1 && menu->load_game->onClick)
-                    menu->load_game->onClick();
+                    menu->load_game->onClick(menu);
                 else if (menu->selected_index == 2 && menu->options->onClick)
-                    menu->options->onClick();
+                    menu->options->onClick(menu);
                 else if (menu->selected_index == 3 && menu->exit->onClick)
-                    menu->exit->onClick();
+                    menu->exit->onClick(menu);
                 break;
         }
 

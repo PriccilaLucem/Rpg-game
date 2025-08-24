@@ -5,6 +5,13 @@
 #include <SDL_ttf.h>
 #include "../constants/constants.h"
 
+typedef struct Options Options;
+typedef struct Menu Menu;
+
+extern Options* options;
+extern Menu* main_menu;
+
+
 typedef struct InitialScreen
 {
     SDL_Window* window;
@@ -12,7 +19,6 @@ typedef struct InitialScreen
     SDL_Event event;    
 
     void (*clear)(struct InitialScreen* screen);
-
 } InitialScreen;
 
 InitialScreen* init_initial_screen();
