@@ -16,8 +16,9 @@ typedef struct InitialScreen
 {
     SDL_Window* window;
     SDL_Renderer* renderer;
-    SDL_Event event;    
-
+    SDL_Event event; 
+    int screen_width;   
+    int screen_height;
     void (*clear)(struct InitialScreen* screen);
 } InitialScreen;
 

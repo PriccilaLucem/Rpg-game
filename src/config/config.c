@@ -19,11 +19,10 @@ Config* load_config(){
     char key[50];
     char value[50];
     while(fscanf(file, "%49[^=]=%49[^\n]\n", key, value) == 2){
-        printf("Read config: %s = %s\n", key, value);
-        if(strcmp(key, "window_width") == 0){
+        if(strcmp(key, "screen_width") == 0){
             printf("CONFIG WIDTH");
             config->screen_width = atoi(value);
-        } else if(strcmp(key, "window_height") == 0){
+        } else if(strcmp(key, "screen_height") == 0){
             printf("CONFIG HEIGHT");
             config->screen_height = atoi(value);
         } else if(strcmp(key, "fullscreen") == 0){

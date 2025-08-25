@@ -9,8 +9,6 @@
 #define ARROW_RIGHT 1
 #define ARROW_UP 2
 #define ARROW_DOWN 3
-#define SCREEN_W 800
-#define SCREEN_H 600
 
 
 typedef enum {
