@@ -5,6 +5,9 @@
 #include "../config/config.h"
 
 static void init_libs(void) {
+    SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
+    SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
+    
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         SDL_Log("SDL initialization failed: %s", SDL_GetError());
         printf("SDL initialization failed: %s\n", SDL_GetError());
@@ -17,14 +20,23 @@ static void init_libs(void) {
         printf("TTF initialization failed: %s\n", TTF_GetError());
         exit(EXIT_FAILURE);
     }
-} 
-
+}
 static SDL_Window* init_window(int SCREEN_W, int SCREEN_H, bool fullscreen) {
+    SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
+    SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
+    
+    Uint32 window_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
+    
+    if (fullscreen) {
+        window_flags |= SDL_WINDOW_FULLSCREEN;
+    }
+    
     SDL_Window* window = SDL_CreateWindow("SDL2 Game",
                                         SDL_WINDOWPOS_CENTERED,
                                         SDL_WINDOWPOS_CENTERED,
                                         SCREEN_W, SCREEN_H,
-                                        fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_SHOWN);
+                                        window_flags);
+    
     if (!window) {
         SDL_Log("Window creation failed: %s", SDL_GetError());
         TTF_Quit();
@@ -32,9 +44,14 @@ static SDL_Window* init_window(int SCREEN_W, int SCREEN_H, bool fullscreen) {
         printf("Window creation failed: %s\n", SDL_GetError());
         exit(EXIT_FAILURE);
     }
+    
+    float ddpi, hdpi, vdpi;
+    if (SDL_GetDisplayDPI(0, &ddpi, &hdpi, &vdpi) == 0) {
+        SDL_Log("Display DPI: %.0f (%.0fx%.0f)", ddpi, hdpi, vdpi);
+    }
+    
     return window;
 }
-
 static SDL_Renderer* init_renderer(SDL_Window* window, bool vsync) {
     if (!window) {
         SDL_Log("Error: Cannot create renderer for NULL window");
@@ -114,3 +131,13 @@ InitialScreen* init_initial_screen() {
     return screen;
 }
 
+void toggle_fullscreen(SDL_Window* window, bool* fullscreen) {
+    if (*fullscreen) {
+        SDL_SetWindowFullscreen(window, 0);
+        SDL_SetWindowSize(window, 800, 600);
+        SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+    } else {
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    }
+    *fullscreen = !*fullscreen;
+}

@@ -38,7 +38,6 @@ static void handle_music_volume_click(Options* options);
 static void handle_effects_volume_click(Options* options);
 static void handle_voice_volume_click(Options* options);
 static void handle_save_click(Options* options);
-static void handle_load_click(Options* options);
 static void handle_reset_click(Options* options);
 static void handle_back_to_main_menu(Options* options);
 
@@ -136,7 +135,7 @@ void free_options(Options* options) {
         options->screen_size_left_arrow, options->screen_size_right_arrow, options->screen_size,
         options->full_screen, options->vsync, options->sound, options->volume,
         options->antialiasing, options->music_volume, options->effects_volume,
-        options->voice_volume, options->save, options->load, options->reset,
+        options->voice_volume, options->save, options->reset,
         options->back_to_main_menu, NULL
     };
 
@@ -243,20 +242,20 @@ void handle_options_input(SDL_Event* event, Options* options) {
     }
 }
 
-void render_options(Options* options, SDL_Renderer* renderer, int screen_width) {
+void render_options(Options* options, SDL_Renderer* renderer ) {
     if (!options || !renderer) return;
-    
+    int current_width, current_height;
+    SDL_GetWindowSize(window, &current_width, &current_height);
     // Clear screen
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
     // Render title
-    render_title(options, renderer, screen_width);
+    render_title(options, renderer, current_width);
 
     // Render all buttons
     render_all_buttons(options, renderer);
 
-    SDL_RenderPresent(renderer);
 }
 
 void set_button_geometry(Button* button, int x, int y, int width, int height) {
@@ -347,9 +346,6 @@ static void setup_button_geometry(Options* options, int screen_width, int screen
     options->save = init_button(right_x, right_y, right_column_width, button_height, "SAVE", false, false, options->button_font);
     right_y += button_height + spacing_y_right;
     
-    options->load = init_button(right_x, right_y, right_column_width, button_height, "LOAD", false, false, options->button_font);
-    right_y += button_height + spacing_y_right;
-    
     options->reset = init_button(right_x, right_y, right_column_width, button_height, "RESET TO DEFAULT", false, false, options->button_font);
     right_y += button_height + spacing_y_right;
     
@@ -365,7 +361,7 @@ static void initialize_buttons_textures(Options* options) {
         options->screen_size_left_arrow, options->screen_size_right_arrow, options->screen_size,
         options->full_screen, options->vsync, options->sound, options->volume,
         options->antialiasing, options->music_volume, options->effects_volume,
-        options->voice_volume, options->save, options->load, options->reset,
+        options->voice_volume, options->save, options->reset,
         options->back_to_main_menu, NULL
     };
 
@@ -391,7 +387,7 @@ static void handle_mouse_motion(Options* options, int mouse_x, int mouse_y) {
         options->screen_size_left_arrow, options->screen_size_right_arrow, options->screen_size,
         options->full_screen, options->vsync, options->sound, options->volume,
         options->antialiasing, options->music_volume, options->effects_volume,
-        options->voice_volume, options->save, options->load, options->reset,
+        options->voice_volume, options->save, options->reset,
         options->back_to_main_menu, NULL
     };
 
@@ -439,9 +435,7 @@ static void handle_mouse_click(Options* options, int mouse_x, int mouse_y) {
     else if (check_button_click(options->save, mouse_x, mouse_y)) {
         handle_save_click(options);
     }
-    else if (check_button_click(options->load, mouse_x, mouse_y)) {
-        handle_load_click(options);
-    }
+
     else if (check_button_click(options->reset, mouse_x, mouse_y)) {
         handle_reset_click(options);
     }
@@ -471,7 +465,7 @@ static void render_all_buttons(Options* options, SDL_Renderer* renderer) {
         options->screen_size_left_arrow, options->screen_size_right_arrow, options->screen_size,
         options->full_screen, options->vsync, options->sound, options->volume,
         options->antialiasing, options->music_volume, options->effects_volume,
-        options->voice_volume, options->save, options->load, options->reset,
+        options->voice_volume, options->save, options->reset,
         options->back_to_main_menu, NULL
     };
 
@@ -485,26 +479,22 @@ static void render_all_buttons(Options* options, SDL_Renderer* renderer) {
 static void handle_fullscreen_toggle(Options* options) {
     options->config->fullscreen = !options->config->fullscreen;
     SDL_SetWindowFullscreen(window, options->config->fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
-    save_config(options->config);
     update_options(options);
 }
 
 static void handle_vsync_toggle(Options* options) {
     options->config->vsync = !options->config->vsync;
-    save_config(options->config);
     update_options(options);
 }
 
 static void handle_sound_toggle(Options* options) {
     options->config->sound_enabled = !options->config->sound_enabled;
-    save_config(options->config);
     update_options(options);
 }
 
 static void handle_volume_click(Options* options) {
     options->config->volume_level = (options->config->volume_level + 10) % 110;
     if (options->config->volume_level == 0) options->config->volume_level = 10;
-    save_config(options->config);
     update_options(options);
 }
 
@@ -513,28 +503,24 @@ static void handle_antialiasing_click(Options* options) {
     else if (options->config->antialiasing == 2) options->config->antialiasing = 4;
     else if (options->config->antialiasing == 4) options->config->antialiasing = 8;
     else options->config->antialiasing = 0;
-    save_config(options->config);
     update_options(options);
 }
 
 static void handle_music_volume_click(Options* options) {
     options->config->music_volume = (options->config->music_volume + 10) % 110;
     if (options->config->music_volume == 0) options->config->music_volume = 10;
-    save_config(options->config);
     update_options(options);
 }
 
 static void handle_effects_volume_click(Options* options) {
     options->config->effects_volume = (options->config->effects_volume + 10) % 110;
     if (options->config->effects_volume == 0) options->config->effects_volume = 10;
-    save_config(options->config);
     update_options(options);
 }
 
 static void handle_voice_volume_click(Options* options) {
     options->config->voice_volume = (options->config->voice_volume + 10) % 110;
     if (options->config->voice_volume == 0) options->config->voice_volume = 10;
-    save_config(options->config);
     update_options(options);
 }
 
@@ -542,14 +528,7 @@ static void handle_save_click(Options* options) {
     save_config(options->config);
 }
 
-static void handle_load_click(Options* options) {
-    Config* loaded = load_config();
-    if (loaded) {
-        *options->config = *loaded;
-        free(loaded);
-        update_options(options);
-    }
-}
+
 
 static void handle_reset_click(Options* options) {
     reset_config_to_defaults(options->config);

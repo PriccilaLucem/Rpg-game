@@ -21,16 +21,8 @@ SDL_Renderer* renderer = NULL;
 int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow) {
     (void)hInst; (void)hInstPrev; (void)cmdline; (void)cmdshow;
     
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        fprintf(stderr, "SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-        return 1;
-    }
-    
-    if (TTF_Init() == -1) {
-        fprintf(stderr, "TTF could not initialize! TTF_Error: %s\n", TTF_GetError());
-        SDL_Quit();
-        return 1;
-    }
+    SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
+    SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
     
     InitialScreen* screen = init_initial_screen();   
     if(!screen){
@@ -78,7 +70,7 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
     }
 
     // Cleanup
-    cleanup_states(main_menu, NULL);
+    cleanup_states(main_menu, options);
     screen->clear(screen);
     TTF_Quit();
     SDL_Quit();
