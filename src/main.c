@@ -1,88 +1,86 @@
+#include "states/states.h"
 #include <SDL.h>
 #include <SDL_ttf.h>
-#include "states/states.h"
-#include "./ui/menu/menu.h"
-`
+#include "./ui/main_menu/main_menu.h"
+#include "./ui/options/options.h"
+#include "./config/config.h"
+#include "./screen/screen.h"
 
-int main(int argc, char *argv[]) {
-    // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        SDL_Log("SDL initialization failed: %s", SDL_GetError());
+GameState current_state = STATE_MAIN_MENU;
+Config* current_config = NULL;
+Options* options = NULL;
+Menu* main_menu = NULL;
+SDL_Window* window = NULL;
+SDL_Renderer* renderer = NULL;
+#if defined(_WIN32)
+
+#include <windows.h>
+int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow) {
+    (void)hInst; (void)hInstPrev; (void)cmdline; (void)cmdshow;
+#else
+int main(int argc, char* argv[]) {
+    (void)argc; (void)argv;
+#endif
+
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        fprintf(stderr, "SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
         return 1;
-    } 
-
-    // Initialize SDL_ttf
+    }
+    
     if (TTF_Init() == -1) {
-        SDL_Log("TTF initialization failed: %s", TTF_GetError());
+        fprintf(stderr, "TTF could not initialize! TTF_Error: %s\n", TTF_GetError());
         SDL_Quit();
         return 1;
     }
-
-    // Create window
-    SDL_Window* window = SDL_CreateWindow("SDL2 Game",
-                                         SDL_WINDOWPOS_CENTERED,
-                                         SDL_WINDOWPOS_CENTERED,
-                                         800, 600,
-                                         SDL_WINDOW_SHOWN);
-    if (!window) {
-        SDL_Log("Window creation failed: %s", SDL_GetError());
+    
+    InitialScreen* screen = init_initial_screen();   
+    if(!screen){
+        fprintf(stderr, "Failed to initialize screen\n");
+        TTF_Quit();
+        SDL_Quit();
+        return 1;
+    }
+    
+    renderer = screen->renderer;
+    window = screen->window;
+    main_menu = init_menu(screen->screen_width, screen->screen_height,  24);
+    options = init_options(screen->screen_width, screen->screen_height, screen->renderer, 24);
+    if (!main_menu || !options) {
+        fprintf(stderr, "Failed to initialize main menu or options\n");
+        screen->clear(screen);
         TTF_Quit();
         SDL_Quit();
         return 1;
     }
 
-    // Create renderer
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!renderer) {
-        SDL_Log("Renderer creation failed: %s", SDL_GetError());
-        SDL_DestroyWindow(window);
-        TTF_Quit();
-        SDL_Quit();
-        return 1;
-    }
-
-    // Load font
-    TTF_Font* font = TTF_OpenFont(PATH_TO_MENU_FONT, 24);
-    if (!font) {
-        SDL_Log("Failed to load font: %s", TTF_GetError());
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        TTF_Quit();
-        SDL_Quit();
-        return 1;
-    }
-
-    // Main loop
+    // Inicializar estados
+    init_states(STATE_MAIN_MENU);
     int running = 1;
-    int game_state = 0; // 0 = menu, 1 = game
-
-    while (running) {
-        SDL_Event event;
-
-        if (game_state == 0) {
-            // Menu state
-            handle_menu_events(&event, &running, &game_state);
-            render_menu(renderer, font);
-        } else {
-            // Game state
-            while (SDL_PollEvent(&event)) {
-                if (event.type == SDL_QUIT) {
-                    running = 0;
-                }
+    while (running && current_state != STATE_EXIT) {
+        while (SDL_PollEvent(&screen->event)) {
+            if (screen->event.type == SDL_QUIT) {
+                running = 0;
             }
-            // Game rendering
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-            SDL_RenderClear(renderer);
-            SDL_RenderPresent(renderer);
+            handle_state_input(&screen->event);
         }
 
-        SDL_Delay(16); // ~60 FPS
+        // Clear screen
+        SDL_SetRenderDrawColor(screen->renderer, 0, 0, 0, 255);
+        SDL_RenderClear(screen->renderer);
+
+        // Render do estado atual
+        render_state(screen->renderer, main_menu, options);
+
+        // Update screen
+        SDL_RenderPresent(screen->renderer);
+
+        // Cap frame rate
+        SDL_Delay(16);
     }
 
     // Cleanup
-    TTF_CloseFont(font);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
+    cleanup_states(main_menu, NULL);
+    screen->clear(screen);
     TTF_Quit();
     SDL_Quit();
 

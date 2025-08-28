@@ -1,37 +1,26 @@
+// states.h
 #ifndef STATES_H
 #define STATES_H
 
-#define MAX_DESCRIPTION_LENGTH 200
-#define MAX_NAME_LENGTH 20
-#define PATH_TO_MENU_FONT "src/assets/fonts/Luckiest_Guy,Playfair_Display/Luckiest_Guy/LuckiestGuy-Regular.ttf"
+#include <SDL.h>
+#include "../constants/constants.h"
 
-typedef enum itens_type {
-    ITEM_WEAPON,      
-    ITEM_ARMOR,       
-    ITEM_CONSUMABLE,  
-    ITEM_MATERIAL,    
-    ITEM_KEY,        
-    ITEM_MISC
-} ItemType;
 
-typedef enum armor_type {
-    ARMOR_TYPE_HELMET = 'H',
-    ARMOR_TYPE_CHEST = 'C',
-    ARMOR_TYPE_LEGS = 'L',
-    ARMOR_TYPE_BOOTS = 'B',
-    ARMOR_TYPE_GLOVES = 'G',
-    ARMOR_TYPE_SHIELD = 'S',
-} ArmorType;
+typedef struct Menu Menu;
+typedef struct Options Options;
 
-typedef enum weapon_type {
-    WEAPON_TYPE_SWORD = 'S',
-    WEAPON_TYPE_AXE = 'A',
-    WEAPON_TYPE_BOW = 'B',
-    WEAPON_TYPE_DAGGER = 'D',
-    WEAPON_TYPE_STAFF = 'T',
-    WEAPON_TYPE_MACE = 'M'
-} WeaponType;
+extern Menu* main_menu;
+extern GameState current_state;
+extern Options* options;
+extern SDL_Window* window;
 
-int get_num_state(void);
+int get_id_gen();
+void change_state(GameState new_state);
+void handle_state_input(SDL_Event* event);
+void update_state(Menu* main_menu, Options* options);
+void render_state(SDL_Renderer* renderer, Menu* main_menu, Options* options);
+void init_states(GameState initial_state);
+void cleanup_states(Menu* main_menu, Options* options);
+void change_state(GameState new_state);
 
 #endif

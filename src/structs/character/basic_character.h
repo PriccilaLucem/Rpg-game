@@ -12,7 +12,6 @@
 #include "../race/race.h"
 
 
-/// @brief A basic character Struct used to implement all npcs of the game
 typedef struct basic_character
 {
     int id;
@@ -25,7 +24,8 @@ typedef struct basic_character
     Race* race;
     Class* cls;
     EquippedArmors* equipped_armors;
-    
+    char path_to_image[50];
+
     union basic_character
     {
         struct MainCharacter* MainCharacter;
@@ -38,6 +38,7 @@ typedef struct basic_character
 basicCharacter* init_basic_character_as_main(
     const char* name,
     const char* description,
+    const char* path_to_img,
     Attributes* attributes,
     Race* race,
     Class* class
