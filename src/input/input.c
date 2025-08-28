@@ -1,35 +1,37 @@
 #include "./input.h"
+#include "../load_obj/load_obj.h"
 
-void handleInput(Input* input, SDL_Event* event) {
-
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-            case SDL_QUIT:
-                input->quit = true;
-                break;
-
-            case SDL_KEYDOWN:
-                input->keys[event.key.keysym.scancode] = true;
-                break;
-
-            case SDL_KEYUP:
-                input->keys[event.key.keysym.scancode] = false;
-                break;
-
-            case SDL_MOUSEMOTION:
-                input->mouseX = event.motion.x;
-                input->mouseY = event.motion.y;
-                break;
-
-            case SDL_MOUSEBUTTONDOWN:
-                if (event.button.button < 5)
-                    input->mouseButtons[event.button.button] = true;
-                break;
-
-            case SDL_MOUSEBUTTONUP:
-                if (event.button.button < 5)
-                    input->mouseButtons[event.button.button] = false;
-                break;
-        }
+void input(SDL_Event* event){
+    switch (event->key.keysym.sym) {
+                    case SDLK_UP:
+                        OBJ_Translate(obj_model, 0, -0.5f, 0);
+                        break;
+                    case SDLK_DOWN:
+                        OBJ_Translate(obj_model, 0, 0.5f, 0);
+                        break;
+                    case SDLK_LEFT:
+                        OBJ_Translate(obj_model, -0.5f, 0, 0);
+                        break;
+                    case SDLK_RIGHT:
+                        OBJ_Translate(obj_model, 0.5f, 0, 0);
+                        break;
+                    case SDLK_w:
+                        OBJ_Translate(obj_model, 0, 0, 0.5f);
+                        break;
+                    case SDLK_s:
+                        OBJ_Translate(obj_model, 0, 0, -0.5f);
+                        break;
+                    case SDLK_q:
+                        OBJ_Rotate(obj_model, 0, 0.1f, 0);
+                        break;
+                    case SDLK_e:
+                        OBJ_Rotate(obj_model, 0, -0.1f, 0);
+                        break;
+                    case SDLK_a:
+                        OBJ_Scale(obj_model, 1.1f);
+                        break;
+                    case SDLK_z:
+                        OBJ_Scale(obj_model, 0.9f);
+                        break;
+                }
     }
-}

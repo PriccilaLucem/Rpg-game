@@ -4,16 +4,10 @@
 #include <SDL.h>
 #include <stdbool.h>
 
+typedef struct  OBJ_Model OBJ_Model;
 
+extern OBJ_Model* obj_model;
 
-/// @brief Input of all possible keys of keyboard and mouse
-typedef struct Input {
-    bool quit;
-    bool keys[SDL_NUM_SCANCODES];  
-    int mouseX, mouseY;
-    bool mouseButtons[5]; 
-} Input;
-
-void handleInput(Input* input, SDL_Event* event);
+void input(SDL_Event* event);
 
 #endif 

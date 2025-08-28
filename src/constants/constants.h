@@ -15,6 +15,7 @@ typedef enum {
     STATE_MAIN_MENU,
     STATE_OPTIONS,
     STATE_GAME,
+    STATE_OBJ_VIEWER,
     STATE_EXIT
 } GameState;
 

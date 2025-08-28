@@ -9,7 +9,7 @@
 #include "./ui/main_menu/main_menu.h"
 #include "./config/config.h"
 #include "./ui/options/options.h"
-
+#include "./load_obj/load_obj.h"
 
 GameState current_state = STATE_MAIN_MENU;
 Config* current_config = NULL;
@@ -17,6 +17,7 @@ Options* options = NULL;
 Menu* main_menu = NULL;
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
+OBJ_Model* obj_model = NULL;
 
 int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow) {
     (void)hInst; (void)hInstPrev; (void)cmdline; (void)cmdshow;
@@ -32,6 +33,14 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
         return 1;
     }
     
+    obj_model = OBJ_Load("src/assets/player_assets/cube.obj");
+    if (obj_model) {
+        printf("Modelo OBJ carregado com sucesso!\n");
+        OBJ_Scale(obj_model, 1.0f);
+        OBJ_Translate(obj_model, 0, 0, 5);
+        OBJ_SetColor(obj_model, (SDL_Color){255, 255, 255, 255});
+    }
+
     renderer = screen->renderer;
     window = screen->window;
     main_menu = init_menu(screen->screen_width, screen->screen_height,  24);

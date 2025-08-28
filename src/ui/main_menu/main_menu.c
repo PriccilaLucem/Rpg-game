@@ -2,7 +2,8 @@
 #include <stdio.h>
 
 static void handle_start_button(void* data){
-    printf("Start button");
+    change_state(STATE_GAME);
+    printf("Entering game");
 }
 static void handle_option_button(void* data){
     change_state(STATE_OPTIONS);
