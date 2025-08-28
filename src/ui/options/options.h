@@ -41,7 +41,6 @@ typedef struct Options {
     
     // Right column buttonsX
     Button* save;
-    Button* load;
     Button* reset;
     Button* back_to_main_menu;
 } Options;
@@ -52,7 +51,7 @@ void free_options(Options* options);
 void update_options(Options* options);
 void update_screen_size_button_text(Options* options, SDL_Renderer* renderer);
 void handle_options_input(SDL_Event* event, Options* options);
-void render_options(Options* options, SDL_Renderer* renderer, int screen_width);
+void render_options(Options* options, SDL_Renderer* renderer);
 void apply_resolution(Options* options);
 void update_button_geometry(Options* options, int screen_width, int screen_height);
 

@@ -53,9 +53,8 @@ void render_state(SDL_Renderer* renderer, Menu* main_menu, Options* options) {
             break;
 
         case STATE_OPTIONS:
-            int current_width, current_height;
-            SDL_GetWindowSize(window, &current_width, &current_height);
-            if(options) render_options(options, renderer, current_width);
+
+            if(options) render_options(options, renderer);
         case STATE_EXIT:
             break;
     }
