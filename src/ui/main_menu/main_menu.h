@@ -4,7 +4,6 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include "../button/button.h"
-#include "../../input/input.h"
 #include "../button/button.h"
 #include "../../constants/constants.h"
 #include "../../states/states.h"

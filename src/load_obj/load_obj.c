@@ -130,11 +130,13 @@ void OBJ_Free(OBJ_Model* model) {
     }
 }
 
-void OBJ_Render(SDL_Renderer* renderer, OBJ_Model* model, int screen_width, int screen_height) {
+void OBJ_Render(SDL_Renderer* renderer, OBJ_Model* model) {
     if (!model || !renderer) {
         printf("Erro: Modelo ou renderer nulo\n");
         return;
     }
+    int screen_width, screen_height;
+    SDL_GetWindowSize(window, &screen_width, &screen_height);
     SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer, model->color.r, model->color.g, model->color.b, model->color.a);
 
@@ -228,4 +230,17 @@ void OBJ_SetColor(OBJ_Model* model, SDL_Color color) {
     if (model) {
         model->color = color;
     }
+}
+SDL_Rect toRect(const OBJ_Model* model){
+    SDL_Rect rect;
+    int screen_width, screen_height;
+    SDL_GetWindowSize(window, &screen_width, &screen_height);
+
+    rect.x = (int)(model->position_x - model->scale/2);
+    rect.y = (int)(model->position_y - model->scale/2);
+    rect.w = (int) model->scale;
+    rect.h = (int) model->scale;
+    rect.x += screen_width/2;
+    rect.y += screen_height/2;
+
 }

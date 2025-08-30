@@ -1,5 +1,4 @@
-#include "./input.h"
-#include "../load_obj/load_obj.h"
+#include "./character.h"
 
 void input(SDL_Event* event){
     switch (event->key.keysym.sym) {
@@ -33,5 +32,6 @@ void input(SDL_Event* event){
                     case SDLK_z:
                         OBJ_Scale(obj_model, 0.9f);
                         break;
-                }
     }
+}
+

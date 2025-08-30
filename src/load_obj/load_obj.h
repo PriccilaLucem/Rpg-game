@@ -7,6 +7,8 @@
 #include <string.h>
 #include <math.h>
 
+extern SDL_Window* window;
+
 typedef struct {
     float x, y, z;
 } Vertex;
@@ -30,10 +32,11 @@ typedef struct OBJ_Model {
 
 OBJ_Model* OBJ_Load(const char* filename);
 void OBJ_Free(OBJ_Model* model);
-void OBJ_Render(SDL_Renderer* renderer, OBJ_Model* model, int screen_width, int screen_height);
+void OBJ_Render(SDL_Renderer* renderer, OBJ_Model* model);
 void OBJ_Rotate(OBJ_Model* model, float dx, float dy, float dz);
 void OBJ_Translate(OBJ_Model* model, float dx, float dy, float dz);
 void OBJ_Scale(OBJ_Model* model, float factor);
 void OBJ_SetColor(OBJ_Model* model, SDL_Color color);
+SDL_Rect toRect(const OBJ_Model* model);
 
 #endif

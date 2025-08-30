@@ -2,7 +2,7 @@
 #define CLASS_H
 
 #include <string.h>
-#include "../states/states.h"
+#include "../../constants/constants.h"
 
 typedef struct class{
     

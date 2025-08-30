@@ -1,4 +1,3 @@
-
 #include <SDL_ttf.h>
 #include <windows.h>
 #include <SDL.h>

@@ -1,7 +1,7 @@
 #ifndef ITENS_H 
 #define ITENS_H
 
-#include "../states/states.h"
+#include "../../constants/constants.h"
 #include <string.h>
 #include <stdbool.h>
 

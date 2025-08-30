@@ -2,8 +2,9 @@
 #include "../config/config.h"
 #include "../ui/main_menu/main_menu.h"
 #include "../ui/options/options.h"
-#include "../input/input.h"
+#include "../game/characters/character.h"
 #include "../load_obj/load_obj.h"
+#include "../game/init_game/init_game.h"
 #include <stdio.h>
 
 int id_generator = 0;
@@ -26,9 +27,7 @@ void handle_state_input(SDL_Event* event) {
             if (options) handle_options_input(event, options);
             break;
         case STATE_GAME:
-            if (event->type == SDL_KEYDOWN) {
-                input(event);
-            }
+            // TODO
             break;
         case STATE_EXIT:
             break;
@@ -65,9 +64,7 @@ void render_state(SDL_Renderer* renderer, Menu* menu, Options* options) {
             if (options) render_options(options, renderer);
             break;
         case STATE_GAME:
-            int current_width, current_height;
-            SDL_GetWindowSize(window, &current_width, &current_height);
-            OBJ_Render(renderer, obj_model, current_width, current_height);
+            render_init_game(renderer);
             break;
         case STATE_EXIT:
             break;
@@ -85,9 +82,5 @@ void cleanup_states(Menu* main_menu, Options* options) {
     }
     if (options) {
         free_options(options);
-    }
-    if (obj_model) {
-        OBJ_Free(obj_model);
-        obj_model = NULL;
     }
 }
