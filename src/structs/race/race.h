@@ -2,7 +2,8 @@
 #define RACE_H
 
 #include <string.h>
-#include "../states/states.h"
+#include "../../constants/constants.h"
+
 
 /// @brief Race struct with base skills
 typedef struct race {

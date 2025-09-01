@@ -248,7 +248,6 @@ void render_options(Options* options, SDL_Renderer* renderer ) {
     SDL_GetWindowSize(window, &current_width, &current_height);
     // Clear screen
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderClear(renderer);
 
     // Render title
     render_title(options, renderer, current_width);

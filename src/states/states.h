@@ -5,14 +5,15 @@
 #include <SDL.h>
 #include "../constants/constants.h"
 
-
 typedef struct Menu Menu;
 typedef struct Options Options;
+typedef struct OBJ_Model OBJ_Model;
 
 extern Menu* main_menu;
 extern GameState current_state;
 extern Options* options;
 extern SDL_Window* window;
+extern OBJ_Model* obj_model;
 
 int get_id_gen();
 void change_state(GameState new_state);

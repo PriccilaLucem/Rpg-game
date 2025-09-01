@@ -1,10 +1,15 @@
+<<<<<<< HEAD
 #include "states/states.h"
+=======
+#include <SDL_ttf.h>
+#include <windows.h>
+>>>>>>> 440e762362cb28cf4b2393e2736f863e2d68860e
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include "./ui/main_menu/main_menu.h"
 #include "./ui/options/options.h"
-#include "./config/config.h"
-#include "./screen/screen.h"
+#include "./load_obj/load_obj.h"
+
 
 GameState current_state = STATE_MAIN_MENU;
 Config* current_config = NULL;
@@ -12,11 +17,14 @@ Options* options = NULL;
 Menu* main_menu = NULL;
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
+OBJ_Model* obj_model = NULL;
 
 #if defined(_WIN32)
-
 #include <windows.h>
 int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow) {
+#else 
+int main(int argc, char* args[])}{
+#endif 
     (void)hInst; (void)hInstPrev; (void)cmdline; (void)cmdshow;
     
     SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
@@ -30,6 +38,14 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
         return 1;
     }
     
+    obj_model = OBJ_Load("src/assets/player_assets/cube.obj");
+    if (obj_model) {
+        printf("Modelo OBJ carregado com sucesso!\n");
+        OBJ_Scale(obj_model, 1.0f);
+        OBJ_Translate(obj_model, 0, 0, 5);
+        OBJ_SetColor(obj_model, (SDL_Color){255, 255, 255, 255});
+    }
+
     renderer = screen->renderer;
     window = screen->window;
     main_menu = init_menu(screen->screen_width, screen->screen_height,  24);
