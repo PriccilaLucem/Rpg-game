@@ -12,6 +12,7 @@ Options* options = NULL;
 Menu* main_menu = NULL;
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
+
 #if defined(_WIN32)
 
 #include <windows.h>

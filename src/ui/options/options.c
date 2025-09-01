@@ -354,7 +354,7 @@ static void setup_button_geometry(Options* options, int screen_width, int screen
 
 static void create_title_texture(Options* options, SDL_Renderer* renderer) {
     options->texture = create_text_texture(renderer, options->screen_title_font, "Options!", (SDL_Color){255, 255, 255, 255});
-}
+
 
     Button* buttons[] = {
         options->screen_size_left_arrow, options->screen_size_right_arrow, options->screen_size,
@@ -366,9 +366,9 @@ static void create_title_texture(Options* options, SDL_Renderer* renderer) {
 
     for (int i = 0; buttons[i] != NULL; i++) {
         update_button_texture(buttons[i], options->renderer, options->button_font);
-    }
+        }
+    
 }
-
 static void update_all_buttons_textures(Options* options) {
     Button* buttons[] = {
         options->full_screen, options->vsync, options->sound, options->volume,
