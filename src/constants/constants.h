@@ -2,6 +2,7 @@
 #define CONSTANTS_H
 
 #define MENU_FONT_PATH "src/assets/fonts/Luckiest_Guy,Playfair_Display/Luckiest_Guy/LuckiestGuy-Regular.ttf"
+#define MAIN_CHARCATHER_OBJ "src/assets/player_assets/cube.obj"
 #define MAX_BUTTON_LENGTH 50
 #define NUM_RESOLUTIONS 6
 #define NUM_RESOLUTIONS 6
@@ -11,6 +12,8 @@
 #define ARROW_DOWN 3
 #define MAX_DESCRIPTION_LENGTH 500
 #define MAX_NAME_LENGTH 30
+#define MAX_INPUT_LENGTH 20
+
 
 typedef enum {
     STATE_MAIN_MENU,

@@ -7,3 +7,7 @@ MainCharacter* init_main_character(int id){
     
     return main_character;
 }
+
+void free_main_character(MainCharacter* mc){
+    free(mc);
+}

@@ -9,6 +9,7 @@
 #include "./config/config.h"
 #include "./ui/options/options.h"
 #include "./load_obj/load_obj.h"
+#include "./game/game.h"
 
 GameState current_state = STATE_MAIN_MENU;
 Config* current_config = NULL;
@@ -17,6 +18,7 @@ Menu* main_menu = NULL;
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 OBJ_Model* obj_model = NULL;
+Game* game = NULL;
 
 int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow) {
     (void)hInst; (void)hInstPrev; (void)cmdline; (void)cmdshow;
@@ -44,8 +46,10 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
     window = screen->window;
     main_menu = init_menu(screen->screen_width, screen->screen_height,  24);
     options = init_options(screen->screen_width, screen->screen_height, screen->renderer, 24);
-    if (!main_menu || !options) {
-        fprintf(stderr, "Failed to initialize main menu or options\n");
+    game = init_game(screen->screen_width, screen->screen_height, screen->renderer, 24);
+
+    if (!main_menu || !options || !game) {
+        fprintf(stderr, "Failed to initialize main menu, options or game\n");
         screen->clear(screen);
         TTF_Quit();
         SDL_Quit();
@@ -68,7 +72,7 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
         SDL_RenderClear(screen->renderer);
 
         // Render do estado atual
-        render_state(screen->renderer, main_menu, options);
+        render_state(screen->renderer, main_menu, options, game);
 
         // Update screen
         SDL_RenderPresent(screen->renderer);
@@ -78,7 +82,7 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
     }
 
     // Cleanup
-    cleanup_states(main_menu, options);
+    cleanup_states(main_menu, options, game);
     screen->clear(screen);
     TTF_Quit();
     SDL_Quit();

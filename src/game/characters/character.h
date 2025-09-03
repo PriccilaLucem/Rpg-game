@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <SDL.h>
+#include "../../structs/character/basic_character.h"
+#include "../../ui/button/button.h"
 #include "../../load_obj/load_obj.h"
 
 extern OBJ_Model* obj_model;

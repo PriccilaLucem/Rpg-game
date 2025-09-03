@@ -13,5 +13,6 @@ typedef struct
 } MainCharacter;
 
 MainCharacter* init_main_character(int id);
+void free_main_character(MainCharacter* mc);
 
 #endif

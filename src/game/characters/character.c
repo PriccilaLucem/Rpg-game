@@ -35,3 +35,6 @@ void input(SDL_Event* event){
     }
 }
 
+MainCharacter* input_of_main_char(SDL_Renderer* renderer){
+    
+}
