@@ -9,8 +9,6 @@
 #include "./load_obj/load_obj.h"
 
 
-GameState current_state = STATE_MAIN_MENU;
-Config* current_config = NULL;
 Options* options = NULL;
 Menu* main_menu = NULL;
 OBJ_Model* obj_model = NULL;
@@ -21,6 +19,7 @@ SDL_Renderer* renderer = NULL;
         (void)hInst; (void)hInstPrev; (void)cmdline; (void)cmdshow;
 #else 
     int main(int argc, char* args[]){
+        (void)argc; (void)args;
 #endif 
     
     SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
@@ -28,25 +27,24 @@ SDL_Renderer* renderer = NULL;
     
     InitialScreen* screen = init_initial_screen();   
     if(!screen){
-        fprintf(stderr, "Failed to initialize screen\n");
-        TTF_Quit();
+        fprintf(stderr, "%s", "Failed to initialize screen\n");
         SDL_Quit();
         return 1;
     }
-    window = screen->window;
-    renderer = screen->renderer;
     obj_model = OBJ_Load("src/assets/player_assets/cube.obj");
     if (obj_model) {
         printf("Modelo OBJ carregado com sucesso!\n");
         OBJ_Scale(obj_model, 1.0f);
         OBJ_Translate(obj_model, 0, 0, 5);
         OBJ_SetColor(obj_model, (SDL_Color){255, 255, 255, 255});
+    } else {
+        fprintf(stderr, "%s", "Failed to load OBJ model\n");
     }
 
     main_menu = init_menu(screen->screen_width, screen->screen_height,  24);
     options = init_options(screen->screen_width, screen->screen_height, screen->renderer, 24);
     if (!main_menu || !options) {
-        fprintf(stderr, "Failed to initialize main menu or options\n");
+        fprintf(stderr, "%s", "Failed to initialize main menu or options\n");
         screen->clear(screen);
         TTF_Quit();
         SDL_Quit();
@@ -56,7 +54,12 @@ SDL_Renderer* renderer = NULL;
     // Inicializar estados
     init_states(STATE_MAIN_MENU);
     int running = 1;
+    const int TARGET_FPS = 60;
+    const int FRAME_TIME = 1000 / TARGET_FPS;
+    Uint32 frame_start;
+    int frame_delay;
     while (running && current_state != STATE_EXIT) {
+        frame_start = SDL_GetTicks();
         while (SDL_PollEvent(&screen->event)) {
             if (screen->event.type == SDL_QUIT) {
                 running = 0;
@@ -75,11 +78,17 @@ SDL_Renderer* renderer = NULL;
         SDL_RenderPresent(screen->renderer);
 
         // Cap frame rate
-        SDL_Delay(16);
+        frame_delay = FRAME_TIME - (SDL_GetTicks() - frame_start);
+        if (frame_delay > 0) {
+            SDL_Delay(frame_delay);
+        }
     }
 
     // Cleanup
     cleanup_states(main_menu, options);
+    if (obj_model) {
+        OBJ_Free(obj_model);
+    }
     screen->clear(screen);
     TTF_Quit();
     SDL_Quit();

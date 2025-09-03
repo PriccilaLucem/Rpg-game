@@ -1,11 +1,12 @@
-#include <Windows.h>
-#include <stdbool.h>
 #include <SDL.h>
-#include <assert.h>
+#include <SDL_ttf.h>
 
-
-
-int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow) {
-
-    
+#if defined(_WIN32) || defined(WIN32)
+    #include <windows.h>
+    int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow){
+#else
+    int main(int argc, char **argv){
+#endif
+    s
+    return 0;
 }
