@@ -1,17 +1,48 @@
-# Compilador
 CC = gcc
+
+# Detect OS
+UNAME_S := $(shell uname -s)
 
 # Flags de compilação
 CFLAGS = -Wall -Wextra -Iinclude/SDL2 -Iinclude/constants
 
-# Flags de linkedição
-LDFLAGS = -Llib -lSDL2 -lSDL2_ttf
+# Configuração específica por SO
+ifeq ($(UNAME_S),Linux)
+    LDFLAGS = -lSDL2 -lSDL2_ttf
+    TARGET = $(BIN_DIR)/game
+else ifeq ($(UNAME_S),Darwin)
+    # Configuração para macOS
+    HOMEBREW := $(shell which brew)
+    CFLAGS += -I/usr/local/include/SDL2 -I/opt/homebrew/include/SDL2
+    LDFLAGS = -L/usr/local/lib -L/opt/homebrew/lib -lSDL2 -lSDL2_ttf
+    TARGET = $(BIN_DIR)/game
+else
+    LDFLAGS = -Llib -lSDL2 -lSDL2_ttf
+    TARGET = $(BIN_DIR)/game.exe
+endif
 
 # Diretórios
 SRC_DIR = src
 OBJ_DIR = obj
 BIN_DIR = bin
 LIB_DIR = lib
+
+# Regra install_libs_mac (corrigida a indentação)
+ifeq ($(UNAME_S),Darwin)
+install_libs_mac:
+	@if [ -z "$(HOMEBREW)" ]; then \
+		echo "Homebrew não encontrado. Instalando Homebrew..."; \
+		/bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; \
+	fi
+	@echo "Instalando SDL2 e SDL2_ttf via Homebrew..."
+	@brew install sdl2 sdl2_ttf || brew upgrade sdl2 sdl2_ttf
+	@echo "Bibliotecas SDL2 instaladas com sucesso!"
+
+# Modifica a regra all para macOS
+all: install_libs_mac $(TARGET)
+else
+all: $(TARGET)
+endif
 
 # Arquivos fonte
 SRCS = $(SRC_DIR)/main.c \
@@ -28,11 +59,9 @@ SRCS = $(SRC_DIR)/main.c \
        $(SRC_DIR)/game/collision/collision.c \
        $(SRC_DIR)/game/floor/floor.c \
        $(SRC_DIR)/game/init_game/init_game.c
+
 # Arquivos objeto
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-
-# Nome do executável
-TARGET = $(BIN_DIR)/game.exe
 
 # Regra padrão
 all: $(TARGET)
@@ -53,12 +82,12 @@ $(BIN_DIR):
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
-# Verificar arquitetura
+# Verificar arquitetura (Windows)
 check_architecture:
 	@echo "Verificando arquitetura..."
 	@file lib/SDL2.dll 2>/dev/null || echo "Use: 'make download_dlls' para baixar DLLs corretas"
 
-# Baixar DLLs corretas (64-bit)
+# Baixar DLLs (Windows 64-bit)
 download_dlls:
 	@echo "Baixando DLLs SDL2 64-bit..."
 	@curl -L https://github.com/libsdl-org/SDL/releases/download/release-2.28.5/SDL2-2.28.5-win32-x64.zip -o sdl2.zip
@@ -68,7 +97,7 @@ download_dlls:
 	@rm sdl2.zip sdl2_ttf.zip
 	@echo "DLLs baixadas para lib/"
 
-# Copiar DLLs (apenas se existirem)
+# Copiar DLLs (Windows)
 copy_dlls: | $(BIN_DIR)
 	@if [ -f lib/SDL2.dll ]; then \
 		cp -f lib/SDL2.dll $(BIN_DIR)/; \
@@ -87,7 +116,14 @@ copy_dlls: | $(BIN_DIR)
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
 
-# Executar o programa (com verificação)
+# Executar o programa
+ifeq ($(UNAME_S),Linux)
+run: $(TARGET)
+	./$(TARGET)
+else ifeq ($(UNAME_S),Darwin)
+run: $(TARGET)
+	./$(TARGET)
+else
 run: $(TARGET) copy_dlls
 	@if [ -f bin/SDL2.dll ] && [ -f bin/SDL2_ttf.dll ]; then \
 		./$(TARGET); \
@@ -95,6 +131,7 @@ run: $(TARGET) copy_dlls
 		echo "DLLs não encontradas. Use: make download_dlls"; \
 		exit 1; \
 	fi
+endif
 
 # Recompilar e executar
 rebuild: clean all run

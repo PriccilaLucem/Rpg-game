@@ -537,3 +537,17 @@ static void handle_reset_click(Options* options) {
 static void handle_back_to_main_menu(Options* options) {
     change_state(STATE_MAIN_MENU);
 }
+
+static void initialize_buttons_textures(Options* options) {
+    Button* buttons[] = {
+        options->screen_size_left_arrow, options->screen_size_right_arrow, options->screen_size,
+        options->full_screen, options->vsync, options->sound, options->volume,
+        options->antialiasing, options->music_volume, options->effects_volume,
+        options->voice_volume, options->save, options->reset,
+        options->back_to_main_menu, NULL
+    };
+
+    for (int i = 0; buttons[i] != NULL; i++) {
+        update_button_texture(buttons[i], options->renderer, options->button_font);
+    }
+}
