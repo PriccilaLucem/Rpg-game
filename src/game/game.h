@@ -6,8 +6,8 @@
 #include "./init_game/init_game.h"
 #include "../structs/character/basic_character.h"
 #include "./ui/character_build.h"
-
-typedef enum {
+#include "../ui/button/button.h"
+typedef enum ScreenEnum{
     INITIAL_SCREEN,
     GAME_SCREEN,
 }ScreenEnum;

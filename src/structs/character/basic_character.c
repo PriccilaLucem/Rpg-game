@@ -6,7 +6,6 @@ BasicCharacter* init_basic_character_as_main(const char* name, const char* descr
     if (!character) return NULL;
     
     // Inicializar campos
-    character->id = 1;
     strncpy(character->name, name, MAX_NAME_LENGTH - 1);
     character->name[MAX_NAME_LENGTH - 1] = '\0';
     
@@ -29,7 +28,7 @@ BasicCharacter* init_basic_character_as_main(const char* name, const char* descr
     // Inicializar caminho da imagem
     strncpy(character->path_to_image, "", 50);
     
-    character->character_type.main_character = init_main_character(character->id);
+    character->character_type.main_character = init_main_character();
     if (!character->character_type.main_character) {
         OBJ_Free(character->model);
         free(character);

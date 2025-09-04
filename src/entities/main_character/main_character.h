@@ -9,10 +9,9 @@
 typedef struct
 {
     int id;
+} MainCharacter;    
 
-} MainCharacter;
-
-MainCharacter* init_main_character(int id);
+MainCharacter* init_main_character();
 void free_main_character(MainCharacter* mc);
 
 #endif

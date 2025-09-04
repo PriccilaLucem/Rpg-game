@@ -59,10 +59,6 @@ void render_char_build(CharacterBuild* char_build, SDL_Renderer* renderer) {
     render_button(char_build->button, renderer);
 }
 
-static void handle_on_click(void* data){
-    //todo
-}
-
 
 void free_char_build(CharacterBuild* char_build) {
     if (!char_build) return;

@@ -13,7 +13,6 @@
 
 typedef struct 
 {
-    int id;
     char description[MAX_DESCRIPTION_LENGTH];
     char name[MAX_NAME_LENGTH];
     int level;
