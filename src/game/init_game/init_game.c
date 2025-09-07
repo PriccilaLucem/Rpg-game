@@ -1,17 +1,33 @@
 #include "./init_game.h"
 
-void render_initial_game(SDL_Renderer* renderer, MainCharater* main_charater, Floor* floor){
-    static IsoCamera cam = { .x = 400, .y = 200, .zoom = 1.0f };
-    const int tile_width = 128;
-    const int tile_height = 64;
+void render_initial_game(SDL_Renderer* renderer, MainCharater* main_charater, Floor* floor) {
+    if (!floor) return;
 
-    render_floor(renderer, floor , &cam, 0, 0, tile_width, tile_height);
+    static IsoCamera cam;
+    static int camera_initialized = 0;
+    
+    if (!camera_initialized) {
+        IsoCamera_Init(&cam, 0, 0, 0);
+        camera_initialized = 1;
+    }
+    
+    const Uint8* keyboard_state = SDL_GetKeyboardState(NULL);
+    HandleCameraInput(&cam, keyboard_state);
 
-    int sx, sy;
-    tile_to_screen(main_charater->tile_x, main_charater->tile_y, &cam, tile_width, tile_height, &sx, &sy);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
 
-    main_charater->bc->model->position_x = sx;
-    main_charater->bc->model->position_y = sy;
+    if (floor->obj) {
+        floor->obj->scale = 200;
+        floor->obj->position_x = 0;
+        floor->obj->position_y = 0;
+        floor->obj->position_z = 0;
+        OBJ_Render_Isometric(renderer, floor->obj, &cam);
+    }
 
-    OBJ_Render(renderer, main_charater->bc->model);
+    if (main_charater && main_charater->bc && main_charater->bc->model) {
+        OBJ_Render_Isometric(renderer, main_charater->bc->model, &cam);
+    }
+    
+    SDL_RenderPresent(renderer);
 }

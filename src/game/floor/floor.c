@@ -1,4 +1,6 @@
 #include "./floor.h"
+#include "./floor.h"
+#include "../../load_obj/load_obj.h"
 
 SDL_Texture* create_white_tile(SDL_Renderer* renderer, int width, int height) {
     SDL_Texture* tex = SDL_CreateTexture(
@@ -14,17 +16,56 @@ SDL_Texture* create_white_tile(SDL_Renderer* renderer, int width, int height) {
         return NULL;
     }
 
-    // Define como alvo de render
+    // salva o alvo atual
+    SDL_Texture* old_target = SDL_GetRenderTarget(renderer);
+
+    // define a textura como alvo
     SDL_SetRenderTarget(renderer, tex);
 
-    // Preenche com branco
+    // preenche com branco opaco
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
 
-    // Volta para renderizador padrão
-    SDL_SetRenderTarget(renderer, NULL);
+    // restaura o alvo original
+    SDL_SetRenderTarget(renderer, old_target);
 
     return tex;
+}
+
+Floor* init_floor_from_obj(SDL_Renderer* renderer, const char* path, int tile_width, int tile_height) {
+    Floor* floor = malloc(sizeof(Floor));
+    if (!floor) {
+        printf("Error allocating floor memory\n");
+        exit(EXIT_FAILURE);
+    }
+
+    OBJ_Model* model = OBJ_Load(path);
+    if (!model) {
+        printf("Failed to load OBJ: %s\n", path);
+        free(floor);
+        exit(EXIT_FAILURE);
+    }
+
+    SDL_Rect bounds = toRect(model);
+
+    floor->width  = bounds.w / tile_width;
+    floor->height = bounds.h / tile_height;
+
+    floor->tiles = malloc(floor->width * sizeof(SDL_Texture**));
+    for (int x = 0; x < floor->width; x++) {
+        floor->tiles[x] = malloc(floor->height * sizeof(SDL_Texture*));
+    }
+
+    SDL_Texture* white_tile = create_white_tile(renderer, tile_width, tile_height);
+
+    for (int x = 0; x < floor->width; x++) {
+        for (int y = 0; y < floor->height; y++) {
+            floor->tiles[x][y] = white_tile;
+        }
+    }
+    floor->obj = model;
+    
+    return floor;
 }
 
 Floor* init_floor_with_white_tiles(SDL_Renderer* renderer, int width, int height, int tile_width, int tile_height) {
@@ -73,26 +114,23 @@ Floor* init_floor_with_white_tiles(SDL_Renderer* renderer, int width, int height
 }
 
 
-void render_floor(SDL_Renderer* renderer, Floor* floor, IsoCamera* cam, int start_x, int start_y, int tile_width, int tile_height) {
-    for(int y = 0; y < floor->height; y++) {
-        for(int x = 0; x < floor->width; x++) {
-            if (!floor->tiles[x][y]) continue; // verifica se há textura
+void free_floor(Floor* floor) {
+    if (!floor) return;
 
-            int sx, sy;
-            tile_to_screen(x, y, cam, tile_width, tile_height, &sx, &sy);
-
-            SDL_Rect dst;
-            dst.x = sx + start_x;  // deslocamento opcional
-            dst.y = sy + start_y;
-            dst.w = tile_width * cam->zoom;
-            dst.h = tile_height * cam->zoom;
-
-            SDL_RenderCopy(renderer, floor->tiles[x][y], NULL, &dst);
+    if (floor->tiles) {
+        for (int x = 0; x < floor->width; x++) {
+            if (floor->tiles[x]) free(floor->tiles[x]);
         }
+        free(floor->tiles);
     }
+
+    // como todos os tiles apontam para a mesma textura, só precisa destruir 1 vez
+    if (floor->width > 0 && floor->height > 0 && floor->tiles[0][0]) {
+        SDL_DestroyTexture(floor->tiles[0][0]);
+    }
+
+    free(floor);
 }
-
-
 
 
  

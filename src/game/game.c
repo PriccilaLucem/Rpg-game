@@ -10,7 +10,7 @@ Game* init_game(int screen_width, int screen_height, SDL_Renderer* renderer, int
     game->font = TTF_OpenFont(MENU_FONT_PATH, font_size);
     game->main_charater = NULL;
     game->char_build = init_char_build();
-    game->floor = init_floor_with_white_tiles(renderer, 20, 20, 128, 64);
+    game->floor = init_floor_from_obj(renderer, "src/assets/floor/floor.obj", 100, 30);
     game->game_enum = INITIAL_SCREEN;
     game->renderer = renderer;
 
@@ -76,17 +76,7 @@ void free_game(Game* game) {
     if (game->main_charater) free_main_charater(game->main_charater);
 
     if (game->floor) {
-        SDL_Texture* white_tile = NULL;
-        if (game->floor->width > 0 && game->floor->height > 0)
-            white_tile = game->floor->tiles[0][0];
-
-        for (int x = 0; x < game->floor->width; x++) {
-            free(game->floor->tiles[x]);
-        }
-        free(game->floor->tiles);
-
-        if (white_tile) SDL_DestroyTexture(white_tile);
-        free(game->floor);
+        free_floor(game->floor);
     }
 
     free(game);
