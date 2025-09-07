@@ -14,6 +14,8 @@ Menu* main_menu = NULL;
 OBJ_Model* obj_model = NULL;
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
+GameState current_state = STATE_MAIN_MENU;
+
 #if defined(_WIN32) || defined(WIN32)
     int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow){
         (void)hInst; (void)hInstPrev; (void)cmdline; (void)cmdshow;
@@ -21,7 +23,6 @@ SDL_Renderer* renderer = NULL;
     int main(int argc, char* args[]){
         (void)argc; (void)args;
 #endif 
-    
     SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
     SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
     
@@ -51,8 +52,6 @@ SDL_Renderer* renderer = NULL;
         return 1;
     }
 
-    // Inicializar estados
-    init_states(STATE_MAIN_MENU);
     int running = 1;
     const int TARGET_FPS = 60;
     const int FRAME_TIME = 1000 / TARGET_FPS;

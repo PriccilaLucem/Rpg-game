@@ -6,7 +6,6 @@
 #include <string.h>
 
 extern SDL_Window* window;
-extern Config* current_config;
 
 /* ===== CONSTANTS AND GLOBALS ===== */
 ScreenResolution available_resolutions[] = {
@@ -39,7 +38,7 @@ static void handle_effects_volume_click(Options* options);
 static void handle_voice_volume_click(Options* options);
 static void handle_save_click(Options* options);
 static void handle_reset_click(Options* options);
-static void handle_back_to_main_menu(Options* options);
+static void handle_back_to_main_menu();
 
 /* ===== PUBLIC FUNCTION IMPLEMENTATIONS ===== */
 
@@ -91,7 +90,6 @@ Options* init_options(int width, int height, SDL_Renderer* renderer, int font_si
 
     // Initialize configuration
     options->config = load_config();
-    current_config = options->config;
     options->renderer = renderer;
 
     // Load fonts
@@ -438,7 +436,7 @@ static void handle_mouse_click(Options* options, int mouse_x, int mouse_y) {
         handle_reset_click(options);
     }
     else if (check_button_click(options->back_to_main_menu, mouse_x, mouse_y)) {
-        handle_back_to_main_menu(options);
+        handle_back_to_main_menu();
     }
 }
 
@@ -534,7 +532,7 @@ static void handle_reset_click(Options* options) {
     update_options(options);
 }
 
-static void handle_back_to_main_menu(Options* options) {
+static void handle_back_to_main_menu() {
     change_state(STATE_MAIN_MENU);
 }
 
