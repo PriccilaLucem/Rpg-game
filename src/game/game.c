@@ -1,61 +1,93 @@
-    #include "./game.h"
+#include "./game.h"
 
+static void handle_input_char_build(Game* game, SDL_Event* event);
+static void handle_on_click(Game* game);
 
-    Game* init_game(int screen_width, int screen_height, SDL_Renderer* renderer, int font_size){
-        Game* game = malloc(sizeof(Game));
-        game->font = TTF_OpenFont(MENU_FONT_PATH, font_size);
-        game->main_character = NULL;
-        game->InitGame.char_build = init_char_build();
-        game->game_enum = INITIAL_SCREEN;
-        return game;
+Game* init_game(int screen_width, int screen_height, SDL_Renderer* renderer, int font_size) {
+    Game* game = malloc(sizeof(Game));
+    if (!game) return NULL;
+
+    game->font = TTF_OpenFont(MENU_FONT_PATH, font_size);
+    game->main_charater = NULL;
+    game->char_build = init_char_build();
+    game->floor = init_floor_with_white_tiles(renderer, 20, 20, 128, 64);
+    game->game_enum = INITIAL_SCREEN;
+    game->renderer = renderer;
+
+    return game;
+}
+
+void render_game(Game* game, SDL_Renderer* renderer) {
+    switch (game->game_enum) {
+        case INITIAL_SCREEN:
+            render_char_build(game->char_build, renderer);
+            break;
+        case GAME_SCREEN:
+            if (game->main_charater)
+                render_initial_game(renderer, game->main_charater, game->floor);
+            break;
+        default:
+            exit(0);
     }
+}
 
-    void render_game(Game* game, SDL_Renderer* renderer){
-        if(game->game_enum == INITIAL_SCREEN){
-            render_char_build(game->InitGame.char_build, renderer);
-        }
-        else if (game->game_enum == GAME_SCREEN)
-        {
-            SDL_Color background_color = {0, 0, 0, 255};
-            SDL_RenderClear(renderer);
-        }
-        
+void handle_game_events(Game* game, SDL_Event* event) {
+    switch (game->game_enum) {
+        case INITIAL_SCREEN:
+            handle_input_char_build(game, event);
+            break;
+        case GAME_SCREEN:
+            // eventos do jogo aqui
+            break;
     }
+}
 
-    void handle_on_click(Game* data){
-        Game* game = (Game*) data;
-        game->main_character = init_basic_character_as_main(game->InitGame.char_build->input_field->text, "Uma descricao momentanea", MAIN_CHARCATHER_OBJ)->character_type.main_character;
-        printf("%s", game->InitGame.char_build->input_field->text);
-        game->game_enum = GAME_SCREEN;
-    }
+static void handle_input_char_build(Game* game, SDL_Event* event) {
+    int mouse_x, mouse_y;
+    SDL_GetMouseState(&mouse_x, &mouse_y);
 
-    void handle_game_events(Game* game, SDL_Event* event){
-        int mouse_x, mouse_y;
-        SDL_GetMouseState(&mouse_x, &mouse_y);
-        switch (game->game_enum){
-            case INITIAL_SCREEN:
-            switch (event->type) {
-                case SDL_MOUSEMOTION:
-                check_button_hover(game->InitGame.char_build->button, mouse_x, mouse_y);
-                break;
-                
-                case SDL_MOUSEBUTTONDOWN:
-                if (event->button.button == SDL_BUTTON_LEFT) {
-                    handle_on_click(game);
-                }
-                break;
+    switch (event->type) {
+        case SDL_MOUSEMOTION:
+            check_button_hover(game->char_build->button, mouse_x, mouse_y);
+            break;
+        case SDL_MOUSEBUTTONDOWN:
+            if (event->button.button == SDL_BUTTON_LEFT) {
+                handle_on_click(game);
             }
             break;
-            case GAME_SCREEN:
-                printf("Entering game screen!");
-                break;
+    }
+}
+
+static void handle_on_click(Game* game) {
+    if (game->main_charater) 
+        free_main_charater(game->main_charater);
+
+    game->main_charater = init_main_charater(
+        10, 10,
+        game->char_build->input_field->text,
+        "Uma descricao momentanea",
+        MAIN_CHARCATHER_OBJ
+    );
+    game->game_enum = GAME_SCREEN;
+}
+
+void free_game(Game* game) {
+    if (game->font) TTF_CloseFont(game->font);
+    if (game->main_charater) free_main_charater(game->main_charater);
+
+    if (game->floor) {
+        SDL_Texture* white_tile = NULL;
+        if (game->floor->width > 0 && game->floor->height > 0)
+            white_tile = game->floor->tiles[0][0];
+
+        for (int x = 0; x < game->floor->width; x++) {
+            free(game->floor->tiles[x]);
         }
+        free(game->floor->tiles);
+
+        if (white_tile) SDL_DestroyTexture(white_tile);
+        free(game->floor);
     }
 
-    void free_game(Game* game){
-        if(game->font) TTF_CloseFont(game->font);
-        if(game->main_character) free_main_character(game->main_character);
-        if(game->font) TTF_CloseFont(game->font);
-        if(game->renderer) SDL_RenderClear(game->renderer);
-        free(game);
-    }
+    free(game);
+}

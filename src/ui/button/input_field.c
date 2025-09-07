@@ -5,6 +5,10 @@
 
 InputField* init_input_field(int x, int y, int width, int height, TTF_Font* font, SDL_Color textColor) {
     InputField* field = malloc(sizeof(InputField));
+    if(!field){
+        printf("Failed to initialize input field");
+        exit(EXIT_FAILURE);
+    }
     field->x = x;
     field->y = y;
     field->width = width;

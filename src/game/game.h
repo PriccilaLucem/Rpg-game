@@ -3,33 +3,29 @@
 
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include "./iso_camera/iso_camera.h"
 #include "./init_game/init_game.h"
-#include "../structs/character/basic_character.h"
-#include "./ui/character_build.h"
+#include "../structs/charater/charater.h"
+#include "./ui/charater_build.h"
 #include "../ui/button/button.h"
-typedef enum ScreenEnum{
+#include "./floor/floor.h"
+
+typedef enum ScreenEnum {
     INITIAL_SCREEN,
     GAME_SCREEN,
-}ScreenEnum;
-
+} ScreenEnum;
 
 typedef struct Game {
-    
+    charaterBuild* char_build;
     SDL_Renderer* renderer;
+    Floor* floor;
     TTF_Font* font;
-    MainCharacter* main_character;
+    MainCharater* main_charater;
     ScreenEnum game_enum;
-    
-    union 
-    {
-        CharacterBuild* char_build;
-    } InitGame;
-    
-    
 } Game;
 
 Game* init_game(int screen_width, int screen_height, SDL_Renderer* renderer, int font_size);
-void render_game(Game* game, SDL_Renderer* event);
+void render_game(Game* game, SDL_Renderer* renderer);
 void free_game(Game* game);
 void handle_game_events(Game* game, SDL_Event* event);
 

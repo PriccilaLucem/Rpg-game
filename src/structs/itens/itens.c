@@ -8,8 +8,8 @@ Weapon initWeapon(
     int damage,
     int weight,
     bool equippable,
-    void (*onEquip)(Weapon*, struct MainCharacter*),
-    void (*onUnequip)(Weapon*, struct MainCharacter*)
+    void (*onEquip)(Weapon*, struct MainCharater*),
+    void (*onUnequip)(Weapon*, struct MainCharater*)
 ) {
     Weapon w;
     w.id = id;
@@ -29,8 +29,8 @@ Armor initArmor(
     int weight,
     int price,
     bool equippable,
-    void (*onEquip)(Armor*, struct MainCharacter*),
-    void (*onUnequip)(Armor*, struct MainCharacter*)
+    void (*onEquip)(Armor*, struct MainCharater*),
+    void (*onUnequip)(Armor*, struct MainCharater*)
 ) {
     Armor a;
     a.id = id;

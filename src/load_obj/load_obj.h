@@ -38,5 +38,6 @@ void OBJ_Translate(OBJ_Model* model, float dx, float dy, float dz);
 void OBJ_Scale(OBJ_Model* model, float factor);
 void OBJ_SetColor(OBJ_Model* model, SDL_Color color);
 SDL_Rect toRect(const OBJ_Model* model);
+void OBJ_RenderAt(SDL_Renderer* renderer, OBJ_Model* model, int offset_x, int offset_y);
 
 #endif

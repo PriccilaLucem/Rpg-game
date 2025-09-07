@@ -1,5 +1,7 @@
 #include "load_obj.h"
 
+static Vertex project_vertex(Vertex v, int screen_width, int screen_height, float fov_rad, float aspect_ratio);
+
 OBJ_Model* OBJ_Load(const char* filename) {
     FILE* file = fopen(filename, "r");
     if (!file) {
@@ -45,7 +47,7 @@ OBJ_Model* OBJ_Load(const char* filename) {
     model->faces = malloc(model->face_count * sizeof(Face));
 
     if (!model->vertices || !model->faces) {
-        printf("Erro de alocação de memória\n");
+        printf("Failed to allocate memory to model\n");
         if (model->vertices) free(model->vertices);
         if (model->faces) free(model->faces);
         free(model);
@@ -124,7 +126,6 @@ void OBJ_Render(SDL_Renderer* renderer, OBJ_Model* model) {
     }
     int screen_width, screen_height;
     SDL_GetWindowSize(window, &screen_width, &screen_height);
-    SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer, model->color.r, model->color.g, model->color.b, model->color.a);
 
     for (int i = 0; i < model->face_count; i++) {
@@ -156,25 +157,10 @@ void OBJ_Render(SDL_Renderer* renderer, OBJ_Model* model) {
         float aspect_ratio = (float)screen_width / (float)screen_height;
         float fov_rad = 1.0f / tanf(fov * 0.5f * 3.14159f / 180.0f);
         
-        
-        Vertex project_vertex(Vertex v) {
-            Vertex result;
-            result.z = v.z;
-            
-            float z = v.z + 5.0f; 
-            if (z > z_near) {
-                result.x = (v.x * fov_rad / aspect_ratio) / z;
-                result.y = (v.y * fov_rad) / z;
                 
-                result.x = (result.x + 1.0f) * 0.5f * screen_width;
-                result.y = (1.0f - result.y) * 0.5f * screen_height;
-            }
-            return result;
-        }
-        
-        Vertex p1 = project_vertex(v1);
-        Vertex p2 = project_vertex(v2);
-        Vertex p3 = project_vertex(v3);
+        Vertex p1 = project_vertex(v1, screen_width, screen_height, fov_rad, aspect_ratio);
+        Vertex p2 = project_vertex(v2, screen_width, screen_height, fov_rad, aspect_ratio);
+        Vertex p3 = project_vertex(v3, screen_width, screen_height, fov_rad, aspect_ratio);
 
         if (p1.z > -4.9f && p2.z > -4.9f && p3.z > -4.9f) {
             SDL_RenderDrawLine(renderer, (int)p1.x, (int)p1.y, (int)p2.x, (int)p2.y);
@@ -183,6 +169,84 @@ void OBJ_Render(SDL_Renderer* renderer, OBJ_Model* model) {
         }
     }
 }
+static Vertex project_vertex(Vertex v, int screen_width, int screen_height, float fov_rad, float aspect_ratio) {
+    Vertex result;
+    result.z = v.z;
+
+    float z = v.z + 5.0f;
+    if (z > 0.1f) {
+        result.x = (v.x * fov_rad / aspect_ratio) / z;
+        result.y = (v.y * fov_rad) / z;
+
+        result.x = (result.x + 1.0f) * 0.5f * screen_width;
+        result.y = (1.0f - result.y) * 0.5f * screen_height;
+    }
+    return result;
+}
+
+void OBJ_RenderAt(SDL_Renderer* renderer, OBJ_Model* model, int offset_x, int offset_y) {
+    if (!model || !renderer) return;
+
+    int screen_width, screen_height;
+    SDL_GetWindowSize(window, &screen_width, &screen_height);
+
+    SDL_SetRenderDrawColor(renderer,
+                           model->color.r, model->color.g,
+                           model->color.b, model->color.a);
+
+    float aspect_ratio = (float)screen_width / (float)screen_height;
+    float fov = 60.0f;
+    float fov_rad = 1.0f / tanf(fov * 0.5f * 3.14159f / 180.0f);
+
+    for (int i = 0; i < model->face_count; i++) {
+        Face face = model->faces[i];
+
+        if (face.v1 < 0 || face.v1 >= model->vertex_count ||
+            face.v2 < 0 || face.v2 >= model->vertex_count ||
+            face.v3 < 0 || face.v3 >= model->vertex_count)
+            continue;
+
+        Vertex v[3];
+        v[0] = model->vertices[face.v1];
+        v[1] = model->vertices[face.v2];
+        v[2] = model->vertices[face.v3];
+
+        for (int j = 0; j < 3; j++) {
+            // Aplica escala
+            v[j].x *= model->scale;
+            v[j].y *= model->scale;
+            v[j].z *= model->scale;
+
+            // Aplica posição original + offset do tile
+            v[j].x += model->position_x + offset_x;
+            v[j].y += model->position_y + offset_y;
+            v[j].z += model->position_z;
+        }
+
+        // Projeção simples perspectiva
+        Vertex p[3];
+        for (int j = 0; j < 3; j++) {
+            float z = v[j].z + 5.0f;
+            p[j].z = v[j].z;
+
+            if (z > 0.1f) {
+                p[j].x = (v[j].x * fov_rad / aspect_ratio) / z;
+                p[j].y = (v[j].y * fov_rad) / z;
+
+                p[j].x = (p[j].x + 1.0f) * 0.5f * screen_width;
+                p[j].y = (1.0f - p[j].y) * 0.5f * screen_height;
+            }
+        }
+
+        // Desenha linhas se estiverem visíveis
+        if (p[0].z > -4.9f && p[1].z > -4.9f && p[2].z > -4.9f) {
+            SDL_RenderDrawLine(renderer, (int)p[0].x, (int)p[0].y, (int)p[1].x, (int)p[1].y);
+            SDL_RenderDrawLine(renderer, (int)p[1].x, (int)p[1].y, (int)p[2].x, (int)p[2].y);
+            SDL_RenderDrawLine(renderer, (int)p[2].x, (int)p[2].y, (int)p[0].x, (int)p[0].y);
+        }
+    }
+}
+
 void OBJ_Rotate(OBJ_Model* model, float dx, float dy, float dz) {
     if (model) {
         model->rotation_x += dx;

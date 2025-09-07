@@ -8,7 +8,7 @@
 
 #include "../../constants/constants.h"
 #include "../../ui/button/button.h"
-#include "../../structs/character/basic_character.h"
+#include "../../structs/charater/charater.h"
 #include "../floor/floor.h"
 
 typedef struct {
@@ -17,10 +17,9 @@ typedef struct {
     InputField* input_field;
     Button* button;
 
-} CharacterBuild;
+} charaterBuild;
 
-CharacterBuild* init_char_build();
-void handle_input_char_build(CharacterBuild* char_build, SDL_Renderer* renderer, SDL_Event* event);
-void render_char_build(CharacterBuild* char_build, SDL_Renderer* renderer);
-void free_char_build(CharacterBuild* char_build);
+charaterBuild* init_char_build();
+void render_char_build(charaterBuild* char_build, SDL_Renderer* renderer);
+void free_char_build(charaterBuild* char_build);
 #endif

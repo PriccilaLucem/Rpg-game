@@ -1,9 +1,12 @@
-#include "./character_build.h"
+#include "./charater_build.h"
 
-static void handle_on_click(void* data);
 
-CharacterBuild* init_char_build(){
-    CharacterBuild* char_build = malloc(sizeof(CharacterBuild));
+charaterBuild* init_char_build(){
+    charaterBuild* char_build = malloc(sizeof(charaterBuild));
+    if(!char_build){
+        printf("Failed to initialize character build");
+        exit(EXIT_FAILURE);
+    }
     int font_size = 20;
     
     TTF_Font* font = TTF_OpenFont(MENU_FONT_PATH, font_size);
@@ -14,12 +17,11 @@ CharacterBuild* init_char_build(){
 
     char_build->input_field = init_input_field(100, 100, 200, 40, font, (SDL_Color){0,0,0,255});
     char_build->button = init_button(100, 150, 200, 40, "Cofirme o nome", false, false, font);
-    char_build->button->onClick = handle_on_click;
     strncpy(char_build->title, "Crie seu personagem!", MAX_DESCRIPTION_LENGTH);
     return char_build;
 }
 
-void handle_input_char_build(CharacterBuild* char_build, SDL_Renderer* renderer, SDL_Event* event) {
+void handle_input_char_build(charaterBuild* char_build, SDL_Renderer* renderer, SDL_Event* event) {
     if (!char_build || !event) return;
 
     InputField* input = char_build->input_field;
@@ -42,7 +44,7 @@ void handle_input_char_build(CharacterBuild* char_build, SDL_Renderer* renderer,
     SDL_FreeSurface(input_surface);
 }
 
-void render_char_build(CharacterBuild* char_build, SDL_Renderer* renderer) {
+void render_char_build(charaterBuild* char_build, SDL_Renderer* renderer) {
     if (!char_build) return;
 
     SDL_Color title_color = {0, 0, 0, 255};
@@ -60,7 +62,7 @@ void render_char_build(CharacterBuild* char_build, SDL_Renderer* renderer) {
 }
 
 
-void free_char_build(CharacterBuild* char_build) {
+void free_char_build(charaterBuild* char_build) {
     if (!char_build) return;
 
     if (char_build->title_font) {
