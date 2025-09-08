@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "../../structs/character/basic_character.h"
+#include "../../structs/charater/basic_charater.h"
 
 bool check_collision(SDL_Rect a, SDL_Rect b);
 

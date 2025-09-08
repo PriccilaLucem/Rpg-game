@@ -2,12 +2,11 @@
 #include "../config/config.h"
 #include "../ui/main_menu/main_menu.h"
 #include "../ui/options/options.h"
-#include "../game/characters/character.h"
-#include "../load_obj/load_obj.h"
-#include "../game/init_game/init_game.h"
-#include <stdio.h>
+#include "../game/game.h"
 
 int id_generator = 0;
+
+
 
 int get_id_gen() {
     return id_generator++;
@@ -27,32 +26,25 @@ void handle_state_input(SDL_Event* event) {
             if (options) handle_options_input(event, options);
             break;
         case STATE_GAME:
-            // TODO
+            if (game) handle_game_events(game, event);
             break;
         case STATE_EXIT:
             break;
     }
 }
 
-void update_state(Menu* main_menu, Options* options) {
+void update_state(Menu* main_menu, Options* options, Game* game) {
     switch (current_state) {
-        case STATE_MAIN_MENU:
-            if (main_menu) update_main_menu(main_menu);
-            break;
         case STATE_OPTIONS:
             if (options) update_options(options);
             break;
-        case STATE_GAME:
-            // Atualizações do jogo podem ser feitas aqui
-            break;
         case STATE_EXIT:
-            cleanup_states(main_menu, options);
+            cleanup_states(main_menu, options, game);
             break;
     }
 }
 
-void render_state(SDL_Renderer* renderer, Menu* menu, Options* options) {
-    // Limpar a tela
+void render_state(SDL_Renderer* renderer, Menu* menu, Options* options, Game* game) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
@@ -64,7 +56,7 @@ void render_state(SDL_Renderer* renderer, Menu* menu, Options* options) {
             if (options) render_options(options, renderer);
             break;
         case STATE_GAME:
-            render_init_game(renderer);
+            if(game) render_game(game, renderer);
             break;
         case STATE_EXIT:
             break;
@@ -76,11 +68,14 @@ void init_states(GameState initial_state) {
     
 }
 
-void cleanup_states(Menu* main_menu, Options* options) {
+void cleanup_states(Menu* main_menu, Options* options, Game* game) {
     if (main_menu) {
         free_main_menu(main_menu);
     }
     if (options) {
         free_options(options);
+    }
+    if(game){
+        free_game(game);
     }
 }

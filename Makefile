@@ -49,16 +49,19 @@ SRCS = $(SRC_DIR)/main.c \
        $(SRC_DIR)/states/states.c \
        $(SRC_DIR)/ui/main_menu/main_menu.c \
        $(SRC_DIR)/ui/button/button.c \
+       $(SRC_DIR)/ui/button/input_field.c \
        $(SRC_DIR)/config/config.c \
        $(SRC_DIR)/screen/screen.c \
        $(SRC_DIR)/load_obj/load_obj.c \
        $(SRC_DIR)/ui/options/options.c \
-       $(SRC_DIR)/game/characters/character.c \
-       $(SRC_DIR)/entities/main_character/main_character.c \
-       $(SRC_DIR)/structs/character/basic_character.c \
+       $(SRC_DIR)/structs/charater/basic_charater.c \
+       $(SRC_DIR)/structs/charater/main_charater.c \
        $(SRC_DIR)/game/collision/collision.c \
-       $(SRC_DIR)/game/floor/floor.c \
-       $(SRC_DIR)/game/init_game/init_game.c
+       $(SRC_DIR)/game/init_game/init_game.c \
+	   $(SRC_DIR)/game/ui/charater_build.c \
+	   $(SRC_DIR)/game/floor/floor.c \
+	   $(SRC_DIR)/game/iso_camera/iso_camera.c \
+	   $(SRC_DIR)/game/game.c
 
 # Arquivos objeto
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)

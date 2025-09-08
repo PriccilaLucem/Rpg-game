@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-struct mainCharacter;
+struct MainCharater;
 
 typedef struct weapon {
     int id;
@@ -48,8 +48,8 @@ Weapon initWeapon(
     int damage,
     int weight,
     bool equippable,
-    void (*onEquip)(Weapon*, struct MainCharacter*),
-    void (*onUnequip)(Weapon*, struct MainCharacter*)
+    void (*onEquip)(Weapon*, struct MainCharater*),
+    void (*onUnequip)(Weapon*, struct MainCharater*)
 );
 
 Armor initArmor(
@@ -59,8 +59,8 @@ Armor initArmor(
     int weight,
     int price,
     bool equippable,
-    void (*onEquip)(Armor*, struct MainCharacter*),
-    void (*onUnequip)(Armor*, struct MainCharacter*)
+    void (*onEquip)(Armor*, struct MainCharater*),
+    void (*onUnequip)(Armor*, struct MainCharater*)
 );
 
 Itens* initItem(

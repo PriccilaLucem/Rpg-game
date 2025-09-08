@@ -8,6 +8,20 @@
 #include <stdlib.h>
 #include "../../constants/constants.h"
 
+typedef struct {
+   int x;
+    int y;
+    int width;
+    int height;
+    char text[MAX_INPUT_LENGTH];
+    bool isActive;       
+    TTF_Font* font;
+    SDL_Color textColor;
+    SDL_Rect rect;
+    SDL_Texture* texture;
+
+}InputField;
+
 typedef struct Button{
     int id;
     int x;
@@ -33,4 +47,8 @@ bool check_button_click(Button* button, int mouse_x, int mouse_y);
 void free_button(Button* button);
 void render_arrow_button(SDL_Renderer* renderer, int x, int y, int size, int direction);
 
+InputField* init_input_field(int x, int y, int width, int height, TTF_Font* font, SDL_Color textColor);
+void render_input_field(InputField* field, SDL_Renderer* renderer);
+void handle_input_event(InputField* field, SDL_Event* e, SDL_Renderer* renderer);
+void free_input_field(InputField* field);
 #endif

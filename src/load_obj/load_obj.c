@@ -1,4 +1,6 @@
-#include "load_obj.h"
+#include "./load_obj.h"
+
+static Vertex project_vertex(Vertex v, int screen_width, int screen_height, float fov_rad, float aspect_ratio);
 
 static Vertex project_vertex(Vertex v, int screen_width, int screen_height, float aspect_ratio, float fov_rad) {
     Vertex result;
@@ -27,7 +29,6 @@ OBJ_Model* OBJ_Load(const char* filename) {
         return NULL;
     }
 
-    // Inicializar valores
     model->vertices = NULL;
     model->faces = NULL;
     model->vertex_count = 0;
@@ -40,7 +41,6 @@ OBJ_Model* OBJ_Load(const char* filename) {
     // Primeira passagem: contar vértices e faces
     char line[256];
     while (fgets(line, sizeof(line), file)) {
-        // Pular linhas em branco e comentários
         if (line[0] == '#' || line[0] == '\n') continue;
         
         if (line[0] == 'v' && line[1] == ' ') {
@@ -57,12 +57,11 @@ OBJ_Model* OBJ_Load(const char* filename) {
         return NULL;
     }
 
-    // Alocar memória
     model->vertices = malloc(model->vertex_count * sizeof(Vertex));
     model->faces = malloc(model->face_count * sizeof(Face));
 
     if (!model->vertices || !model->faces) {
-        printf("Erro de alocação de memória\n");
+        printf("Failed to allocate memory to model\n");
         if (model->vertices) free(model->vertices);
         if (model->faces) free(model->faces);
         free(model);
@@ -70,18 +69,15 @@ OBJ_Model* OBJ_Load(const char* filename) {
         return NULL;
     }
 
-    // Voltar ao início do arquivo
     rewind(file);
 
     int v_index = 0;
     int f_index = 0;
 
     while (fgets(line, sizeof(line), file)) {
-        // Pular linhas em branco e comentários
         if (line[0] == '#' || line[0] == '\n') continue;
         
         if (line[0] == 'v' && line[1] == ' ') {
-            // Ler vértice
             if (v_index < model->vertex_count) {
                 if (sscanf(line, "v %f %f %f", 
                            &model->vertices[v_index].x,
@@ -91,14 +87,12 @@ OBJ_Model* OBJ_Load(const char* filename) {
                 }
             }
         } else if (line[0] == 'f' && line[1] == ' ') {
-            // Ler face - suporta diferentes formatos
             if (f_index < model->face_count) {
                 char* token = strtok(line + 2, " \t\n");
                 int vertex_indices[4] = {0};
                 int vertex_count = 0;
                 
                 while (token != NULL && vertex_count < 4) {
-                    // Extrair apenas o índice do vértice (ignorar textura/normal)
                     int v;
                     if (sscanf(token, "%d", &v) == 1) {
                         vertex_indices[vertex_count++] = v;
@@ -109,7 +103,6 @@ OBJ_Model* OBJ_Load(const char* filename) {
                     token = strtok(NULL, " \t\n");
                 }
                 
-                // Suporta triângulos e quads (convertendo quads para triângulos)
                 if (vertex_count >= 3) {
                     // Primeiro triângulo
                     model->faces[f_index].v1 = abs(vertex_indices[0]) - 1;
@@ -117,7 +110,6 @@ OBJ_Model* OBJ_Load(const char* filename) {
                     model->faces[f_index].v3 = abs(vertex_indices[2]) - 1;
                     f_index++;
                     
-                    // Segundo triângulo se for quad
                     if (vertex_count == 4 && f_index < model->face_count) {
                         model->faces[f_index].v1 = abs(vertex_indices[0]) - 1;
                         model->faces[f_index].v2 = abs(vertex_indices[2]) - 1;
@@ -130,66 +122,84 @@ OBJ_Model* OBJ_Load(const char* filename) {
     }
 
     fclose(file);
-    printf("Modelo carregado com sucesso: %s\n", filename);
-    printf("Vértices: %d, Faces: %d\n", model->vertex_count, model->face_count);
-    
     return model;
 }
 
-void OBJ_Free(OBJ_Model* model) {
-    if (model) {
-        free(model->vertices);
-        free(model->faces);
-        free(model);
-    }
-}
+
 
 void OBJ_Render(SDL_Renderer* renderer, OBJ_Model* model) {
-    if (!model || !renderer) {
-        printf("Erro: Modelo ou renderer nulo\n");
-        return;
-    }
+    if (!model || !renderer || !model->vertices || model->vertex_count <= 0) return;
+
     int screen_width, screen_height;
     SDL_GetWindowSize(window, &screen_width, &screen_height);
-    SDL_RenderClear(renderer);
-    SDL_SetRenderDrawColor(renderer, model->color.r, model->color.g, model->color.b, model->color.a);
 
-    float z_near = 0.1f;
-    float z_far = 100.0f;
+    // White color for debugging
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
     float fov = 60.0f;
     float aspect_ratio = (float)screen_width / (float)screen_height;
-    float fov_rad = 1.0f / tanf(fov * 0.5f * 3.14159f / 180.0f);
+    float fov_rad = 1.0f / tanf(fov * 0.5f * M_PI / 180.0f);
 
     for (int i = 0; i < model->face_count; i++) {
         Face face = model->faces[i];
+
+        // Validate vertex indices
         if (face.v1 < 0 || face.v1 >= model->vertex_count ||
             face.v2 < 0 || face.v2 >= model->vertex_count ||
             face.v3 < 0 || face.v3 >= model->vertex_count) {
             continue;
         }
-        Vertex v1 = model->vertices[face.v1];
-        Vertex v2 = model->vertices[face.v2];
-        Vertex v3 = model->vertices[face.v3];
 
-        v1.x *= model->scale; v1.y *= model->scale; v1.z *= model->scale;
-        v2.x *= model->scale; v2.y *= model->scale; v2.z *= model->scale;
-        v3.x *= model->scale; v3.y *= model->scale; v3.z *= model->scale;
+        Vertex v[3];
+        v[0] = model->vertices[face.v1];
+        v[1] = model->vertices[face.v2];
+        v[2] = model->vertices[face.v3];
 
-        v1.x += model->position_x; v1.y += model->position_y; v1.z += model->position_z;
-        v2.x += model->position_x; v2.y += model->position_y; v2.z += model->position_z;
-        v3.x += model->position_x; v3.y += model->position_y; v3.z += model->position_z;
-
-        Vertex p1 = project_vertex(v1, screen_width, screen_height, aspect_ratio, fov_rad);
-        Vertex p2 = project_vertex(v2, screen_width, screen_height, aspect_ratio, fov_rad);
-        Vertex p3 = project_vertex(v3, screen_width, screen_height, aspect_ratio, fov_rad);
-
-        if (p1.z > -4.9f && p2.z > -4.9f && p3.z > -4.9f) {
-            SDL_RenderDrawLine(renderer, (int)p1.x, (int)p1.y, (int)p2.x, (int)p2.y);
-            SDL_RenderDrawLine(renderer, (int)p2.x, (int)p2.y, (int)p3.x, (int)p3.y);
-            SDL_RenderDrawLine(renderer, (int)p3.x, (int)p3.y, (int)p1.x, (int)p1.y);
+        // Apply scale and position
+        for (int j = 0; j < 3; j++) {
+            v[j].x = v[j].x * model->scale + model->position_x;
+            v[j].y = v[j].y * model->scale + model->position_y;
+            v[j].z = v[j].z * model->scale + model->position_z;
         }
+
+        // Project vertices to screen space
+        Vertex p[3];
+        for (int j = 0; j < 3; j++) {
+            // Avoid division by zero with a small epsilon
+            float z = (fabs(v[j].z) < 0.001f) ? 0.001f : v[j].z;
+            
+            // Perspective projection
+            p[j].x = (v[j].x * fov_rad * aspect_ratio) / z;
+            p[j].y = (v[j].y * fov_rad) / z;
+            
+            // Convert to screen coordinates
+            p[j].x = (p[j].x + 1.0f) * 0.5f * screen_width;
+            p[j].y = (1.0f - p[j].y) * 0.5f * screen_height;
+        }
+
+        // Draw the triangle edges
+        SDL_RenderDrawLine(renderer, (int)p[0].x, (int)p[0].y, (int)p[1].x, (int)p[1].y);
+        SDL_RenderDrawLine(renderer, (int)p[1].x, (int)p[1].y, (int)p[2].x, (int)p[2].y);
+        SDL_RenderDrawLine(renderer, (int)p[2].x, (int)p[2].y, (int)p[0].x, (int)p[0].y);
     }
 }
+Vertex project_vertex(Vertex v, int screen_width, int screen_height, float fov_rad, float aspect_ratio) {
+    Vertex out;
+
+    // Protege contra divisão por 0
+    if (v.z <= 0.1f) v.z = 0.1f;
+
+    out.x = (v.x * fov_rad * aspect_ratio) / v.z;
+    out.y = (v.y * fov_rad) / v.z;
+    out.z = v.z;
+
+    // Converte para coordenadas de tela
+    out.x = (out.x + 1.0f) * 0.5f * screen_width;
+    out.y = (1.0f - out.y) * 0.5f * screen_height;
+
+    return out;
+}
+
 void OBJ_Rotate(OBJ_Model* model, float dx, float dy, float dz) {
     if (model) {
         model->rotation_x += dx;
@@ -229,4 +239,13 @@ SDL_Rect toRect(const OBJ_Model* model){
     rect.x += screen_width/2;
     rect.y += screen_height/2;
 
+    return rect;   
+}
+
+void OBJ_Free(OBJ_Model* model) {
+    if (model) {
+        free(model->vertices);
+        free(model->faces);
+        free(model);
+    }
 }
