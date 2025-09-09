@@ -17,10 +17,11 @@ BasicCharater* init_basic_charater(const char* name, const char* description, co
     character->is_in_combat = false;
     
     character->rect = (SDL_Rect){0, 0, 50, 50};
-    
-    character->model = OBJ_Load(path_to_obj);
-
-    
+    character->position_x = 0;
+    character->position_y = 50.0f; 
+    character->position_z = 0;
+    character->velocity_y = 0;
+    character->model = OBJ_Load(path_to_obj);    
     
     return character;
 }

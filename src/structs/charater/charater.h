@@ -18,6 +18,8 @@ typedef struct BasicCharater
     bool is_in_combat;
     SDL_Rect rect;
     OBJ_Model* model;
+    float position_x, position_y, position_z;
+    float velocity_y;
 } BasicCharater;
 
 
