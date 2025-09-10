@@ -4,7 +4,7 @@ CC = gcc
 UNAME_S := $(shell uname -s)
 
 # Flags de compilação
-CFLAGS = -Wall -Wextra -Iinclude/SDL2 -Iinclude/constants
+CFLAGS = -Wall -Wextra -std=c99 -Iinclude -Iinclude/SDL2 -Iinclude/constants -Isrc -Isrc/game -Isrc/structs
 
 # Configuração específica por SO
 ifeq ($(UNAME_S),Linux)
@@ -56,12 +56,12 @@ SRCS = $(SRC_DIR)/main.c \
        $(SRC_DIR)/ui/options/options.c \
        $(SRC_DIR)/structs/charater/basic_charater.c \
        $(SRC_DIR)/structs/charater/main_charater.c \
-       $(SRC_DIR)/game/collision/collision.c \
        $(SRC_DIR)/game/init_game/init_game.c \
 	   $(SRC_DIR)/game/ui/charater_build.c \
 	   $(SRC_DIR)/game/floor/floor.c \
 	   $(SRC_DIR)/game/iso_camera/iso_camera.c \
-	   $(SRC_DIR)/game/game.c
+	   $(SRC_DIR)/game/game.c \
+	   $(SRC_DIR)/game/physics/physics.c
 
 # Arquivos objeto
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
@@ -97,8 +97,11 @@ download_dlls:
 	@curl -L https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.20.2/SDL2_ttf-2.20.2-win32-x64.zip -o sdl2_ttf.zip
 	@unzip -j sdl2.zip "*.dll" -d lib/
 	@unzip -j sdl2_ttf.zip "*.dll" -d lib/
+	@# Baixar DLLs adicionais necessárias
+	@curl -L https://www.dll-files.com/zlib1.dll?download -o lib/zlib1.dll
+	@curl -L https://www.dll-files.com/libfreetype-6.dll?download -o lib/libfreetype-6.dll
 	@rm sdl2.zip sdl2_ttf.zip
-	@echo "DLLs baixadas para lib/"
+	@echo "Todas as DLLs baixadas para lib/"
 
 # Copiar DLLs (Windows)
 copy_dlls: | $(BIN_DIR)
@@ -114,7 +117,18 @@ copy_dlls: | $(BIN_DIR)
 	else \
 		echo "SDL2_ttf.dll não encontrada. Use: make download_dlls"; \
 	fi
-
+	@if [ -f lib/zlib1.dll ]; then \
+		cp -f lib/zlib1.dll $(BIN_DIR)/; \
+		echo "zlib1.dll copiada"; \
+	else \
+		echo "zlib1.dll não encontrada"; \
+	fi
+	@if [ -f lib/libfreetype-6.dll ]; then \
+		cp -f lib/libfreetype-6.dll $(BIN_DIR)/; \
+		echo "libfreetype-6.dll copiada"; \
+	else \
+		echo "libfreetype-6.dll não encontrada"; \
+	fi
 # Limpar arquivos compilados
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)

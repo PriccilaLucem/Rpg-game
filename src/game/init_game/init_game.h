@@ -10,6 +10,7 @@
 #include "../../load_obj/load_obj.h"
 #include "../iso_camera/iso_camera.h"
 #include "../floor/floor.h"
+#include "../physics/physics.h"
 
 void render_initial_game(SDL_Renderer* renderer, MainCharater* main_charater,  Floor* floor);
 
