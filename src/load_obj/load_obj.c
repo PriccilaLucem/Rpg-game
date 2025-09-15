@@ -1,20 +1,5 @@
 #include "./load_obj.h"
 
-static Vertex project_vertex(Vertex v, int screen_width, int screen_height, float fov_rad, float aspect_ratio);
-
-static Vertex project_vertex(Vertex v, int screen_width, int screen_height, float aspect_ratio, float fov_rad) {
-    Vertex result;
-    result.z = v.z;
-    float z_near = 0.1f;
-    float z = v.z + 5.0f; // Distância da câmera
-    if (z > z_near) {
-        result.x = (v.x * fov_rad / aspect_ratio) / z;
-        result.y = (v.y * fov_rad) / z;
-        result.x = (result.x + 1.0f) * 0.5f * screen_width;
-        result.y = (1.0f - result.y) * 0.5f * screen_height;
-    }
-    return result;
-}
 
 OBJ_Model* OBJ_Load(const char* filename) {
     FILE* file = fopen(filename, "r");
