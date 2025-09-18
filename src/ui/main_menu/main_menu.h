@@ -3,13 +3,16 @@
 
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "../../music/music.h"
 #include "../button/button.h"
 #include "../button/button.h"
 #include "../../constants/constants.h"
 #include "../../states/states.h"
-
 typedef struct Menu {
     int id;
+    Music* music;
     TTF_Font* title;
     int selected_index;
     int font_size;

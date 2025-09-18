@@ -92,43 +92,35 @@ check_architecture:
 
 # Baixar DLLs (Windows 64-bit)
 download_dlls:
-	@echo "Baixando DLLs SDL2 64-bit..."
+	@echo "Baixando DLLs SDL2 64-bit... \n"
 	@curl -L https://github.com/libsdl-org/SDL/releases/download/release-2.28.5/SDL2-2.28.5-win32-x64.zip -o sdl2.zip
 	@curl -L https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.20.2/SDL2_ttf-2.20.2-win32-x64.zip -o sdl2_ttf.zip
+	@curl -L https://github.com/libsdl-org/SDL_mixer/releases/download/release-2.8.1/SDL2_mixer-2.8.1-win32-x64.zip -o sdl2_mixer.zip
 	@unzip -j sdl2.zip "*.dll" -d lib/
 	@unzip -j sdl2_ttf.zip "*.dll" -d lib/
-	@# Baixar DLLs adicionais necessárias
+	@unzip -j sdl2_mixer.zip "*.dll" -d lib/
+	@echo  "Baixar DLLs adicionais necessárias"
 	@curl -L https://www.dll-files.com/zlib1.dll?download -o lib/zlib1.dll
 	@curl -L https://www.dll-files.com/libfreetype-6.dll?download -o lib/libfreetype-6.dll
-	@rm sdl2.zip sdl2_ttf.zip
+	@rm sdl2.zip sdl2_ttf.zip sdl2_mixer.zip
 	@echo "Todas as DLLs baixadas para lib/"
 
 # Copiar DLLs (Windows)
 copy_dlls: | $(BIN_DIR)
-	@if [ -f lib/SDL2.dll ]; then \
-		cp -f lib/SDL2.dll $(BIN_DIR)/; \
-		echo "SDL2.dll copiada"; \
-	else \
-		echo "SDL2.dll não encontrada. Use: make download_dlls"; \
-	fi
-	@if [ -f lib/SDL2_ttf.dll ]; then \
-		cp -f lib/SDL2_ttf.dll $(BIN_DIR)/; \
-		echo "SDL2_ttf.dll copiada"; \
-	else \
-		echo "SDL2_ttf.dll não encontrada. Use: make download_dlls"; \
-	fi
-	@if [ -f lib/zlib1.dll ]; then \
-		cp -f lib/zlib1.dll $(BIN_DIR)/; \
-		echo "zlib1.dll copiada"; \
-	else \
-		echo "zlib1.dll não encontrada"; \
-	fi
-	@if [ -f lib/libfreetype-6.dll ]; then \
-		cp -f lib/libfreetype-6.dll $(BIN_DIR)/; \
-		echo "libfreetype-6.dll copiada"; \
-	else \
-		echo "libfreetype-6.dll não encontrada"; \
-	fi
+	@echo "Copiando todas as DLLs para $(BIN_DIR)..."
+	@for dll in lib/*.dll; do \
+		cp -f $$dll $(BIN_DIR)/; \
+		echo "`basename $$dll` copiada"; \
+	done
+	@# Verificações (opcionais) de DLLs importantes
+	@for required in SDL2.dll SDL2_ttf.dll SDL2_mixer.dll; do \
+		if [ ! -f $(BIN_DIR)/$$required ]; then \
+			echo "ERRO: $$required não foi copiada."; \
+			exit 1; \
+		fi; \
+	done
+	@echo "Todas as DLLs obrigatórias estão presentes."
+
 # Limpar arquivos compilados
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)

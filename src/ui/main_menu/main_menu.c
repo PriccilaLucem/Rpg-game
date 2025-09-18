@@ -1,5 +1,4 @@
 #include "main_menu.h"
-#include <stdio.h>
 
 static void handle_start_button(void* data){
     change_state(STATE_GAME);
@@ -19,13 +18,17 @@ static void handle_load_game_button(void* data){
 }
 
 Menu* init_menu(int screen_width, int screen_height, int font_size) {
+    
+    
     Menu* menu = malloc(sizeof(Menu));
     if (menu == NULL) {
-        return NULL;
+        printf("Failed to allocate memory for Menu\n");
+        exit(EXIT_FAILURE);
     }
-    menu->id = get_id_gen();
-    menu->screen_size_w = screen_width;
+    // menu->music = init_music();
+
     menu->screen_size_h = screen_height;
+    menu->screen_size_w = screen_width;
     menu->font_size = font_size;
     
     menu->title = TTF_OpenFont(MENU_FONT_PATH, font_size * 2); 
@@ -33,7 +36,7 @@ Menu* init_menu(int screen_width, int screen_height, int font_size) {
     if (menu->title == NULL) {
         printf("Failed to load title font: %s\n", TTF_GetError());
         free(menu);
-        return NULL;
+        exit(EXIT_FAILURE);
     }
     
     TTF_Font* button_font = TTF_OpenFont(MENU_FONT_PATH, font_size);
@@ -41,7 +44,7 @@ Menu* init_menu(int screen_width, int screen_height, int font_size) {
         printf("Failed to load button font: %s\n", TTF_GetError());
         TTF_CloseFont(menu->title);
         free(menu);
-        return NULL;
+        exit(EXIT_FAILURE);
     }
     
     int button_width = screen_width / 4;
@@ -84,7 +87,8 @@ Menu* init_menu(int screen_width, int screen_height, int font_size) {
         if (menu->options) free(menu->options);
         if (menu->exit) free(menu->exit);
         free(menu);
-        return NULL;
+        printf("Failed to initialize buttons\n");
+        exit(EXIT_FAILURE);
     }
     
     return menu;
