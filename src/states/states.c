@@ -4,14 +4,6 @@
 #include "../ui/options/options.h"
 #include "../game/game.h"
 
-int id_generator = 0;
-
-
-
-int get_id_gen() {
-    return id_generator++;
-}
-
 void change_state(GameState new_state) {
     printf("Changing state from %d to %d\n", current_state, new_state);
     current_state = new_state;
