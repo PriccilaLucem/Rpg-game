@@ -10,12 +10,13 @@
 #include "./game/game.h"
 
 
-Options* options = NULL;
-Menu* main_menu = NULL;
 OBJ_Model* obj_model = NULL;
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 GameState current_state = STATE_MAIN_MENU;
+InitialScreen* screen = NULL;
+Menu* main_menu = NULL;
+Options* options = NULL;
 Game* game = NULL;
 
 #if defined(_WIN32) || defined(WIN32)
@@ -28,33 +29,15 @@ Game* game = NULL;
     SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
     SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
     
-    InitialScreen* screen = init_initial_screen();   
+    screen = init_initial_screen();   
     if(!screen){
         fprintf(stderr, "%s", "Failed to initialize screen\n");
         SDL_Quit();
         return 1;
     }
-    obj_model = OBJ_Load("src/assets/player_assets/cube.obj");
-    if (obj_model) {
-        printf("Modelo OBJ carregado com sucesso!\n");
-        OBJ_Scale(obj_model, 1.0f);
-        OBJ_Translate(obj_model, 0, 0, 5);
-        OBJ_SetColor(obj_model, (SDL_Color){255, 255, 255, 255});
-    } else {
-        fprintf(stderr, "%s", "Failed to load OBJ model\n");
-    }
-
-    main_menu = init_menu(screen->screen_width, screen->screen_height,  24);
-    options = init_options(screen->screen_width, screen->screen_height, screen->renderer, 24);
-    game = init_game(screen->screen_width, screen->screen_height, screen->renderer, 24);
-
-    if (!main_menu || !options || !game) {
-        fprintf(stderr, "Failed to initialize main menu, options or game\n");
-        screen->clear(screen);
-        TTF_Quit();
-        SDL_Quit();
-        return 1;
-    }
+    
+    // Inicializar estados e carregar menu inicial
+    init_states(STATE_MAIN_MENU);
 
     int running = 1;
     const int TARGET_FPS = 60;
@@ -88,7 +71,6 @@ Game* game = NULL;
     }
 
     // Cleanup
-    cleanup_states(main_menu, options, game);
     screen->clear(screen);
     TTF_Quit();
     SDL_Quit();

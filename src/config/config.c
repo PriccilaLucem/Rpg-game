@@ -3,18 +3,34 @@
 #include <stdlib.h>
 #include <string.h>
 
+static Config* global_config = NULL;
+
+Config* get_config() {
+    if (global_config == NULL) {
+        global_config = load_config();
+    }
+    return global_config;
+}
+
+void unload_config() {
+    if (global_config != NULL) {
+        free_config(global_config);
+        global_config = NULL;
+    }
+}
+
 Config* load_config(){
     Config* config = malloc(sizeof(Config));
     if(config == NULL){
         printf("Failed to allocate memory for Config\n");
-        exit(EXIT_FAILURE);
+        return NULL;
     }
+    
+    
     FILE* file = fopen("config.conf", "r");
     if(file == NULL){
-        perror("Could not open config file");
-        free(config);
-        printf("Using default configuration\n");
-        exit(EXIT_FAILURE);
+        printf("Config file not found, using defaults\n");
+        return config; // Retorna config com valores padrão
     }
     char key[50];
     char value[50];

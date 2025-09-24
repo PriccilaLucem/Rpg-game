@@ -20,6 +20,8 @@ typedef struct Config {
 } Config;
 
 Config* load_config();
+Config* get_config(); // Singleton pattern - carrega apenas quando necessário
+void unload_config(); // Descarrega config da memória
 void save_config(Config* config);
 void free_config(Config* config);
 void reset_config_to_defaults(Config* config);
