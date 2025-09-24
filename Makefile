@@ -8,16 +8,16 @@ CFLAGS = -Wall -Wextra -std=c99 -Iinclude -Iinclude/SDL2 -Iinclude/constants -Is
 
 # Configuração específica por SO
 ifeq ($(UNAME_S),Linux)
-    LDFLAGS = -lSDL2 -lSDL2_ttf
+    LDFLAGS = -lSDL2 -lSDL2_ttf -lSDL2_mixer
     TARGET = $(BIN_DIR)/game
 else ifeq ($(UNAME_S),Darwin)
     # Configuração para macOS
     HOMEBREW := $(shell which brew)
     CFLAGS += -I/usr/local/include/SDL2 -I/opt/homebrew/include/SDL2
-    LDFLAGS = -L/usr/local/lib -L/opt/homebrew/lib -lSDL2 -lSDL2_ttf
+    LDFLAGS = -L/usr/local/lib -L/opt/homebrew/lib -lSDL2 -lSDL2_ttf -lSDL2_mixer
     TARGET = $(BIN_DIR)/game
 else
-    LDFLAGS = -Llib -lSDL2 -lSDL2_ttf
+    LDFLAGS = -Llib -lSDL2 -lSDL2_ttf -lSDL2_mixer
     TARGET = $(BIN_DIR)/game.exe
 endif
 
@@ -34,8 +34,8 @@ install_libs_mac:
 		echo "Homebrew não encontrado. Instalando Homebrew..."; \
 		/bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; \
 	fi
-	@echo "Instalando SDL2 e SDL2_ttf via Homebrew..."
-	@brew install sdl2 sdl2_ttf || brew upgrade sdl2 sdl2_ttf
+	@echo "Instalando SDL2, SDL2_ttf e SDL2_mixer via Homebrew..."
+	@brew install sdl2 sdl2_ttf sdl2_mixer || brew upgrade sdl2 sdl2_ttf sdl2_mixer
 	@echo "Bibliotecas SDL2 instaladas com sucesso!"
 
 # Modifica a regra all para macOS
