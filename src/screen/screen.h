@@ -23,5 +23,7 @@ typedef struct InitialScreen
 } InitialScreen;
 
 InitialScreen* init_initial_screen();
+void apply_resolution_change(InitialScreen* screen, int new_width, int new_height);
+void toggle_fullscreen(SDL_Window* window, bool* fullscreen);
 
 #endif

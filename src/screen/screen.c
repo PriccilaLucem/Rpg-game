@@ -22,16 +22,27 @@ static void init_libs(void) {
     }
 }
 static SDL_Window* init_window(int SCREEN_W, int SCREEN_H, bool fullscreen) {
+    // Configurações específicas para macOS
+    #ifdef __APPLE__
+        SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
+        SDL_SetHint(SDL_HINT_MAC_CTRL_CLICK_EMULATE_RIGHT_CLICK, "1");
+    #endif
+    
     SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
     SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
     
-    Uint32 window_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
+    Uint32 window_flags = SDL_WINDOW_SHOWN;
+    
+    // No macOS, evitar ALLOW_HIGHDPI para manter tamanho exato
+    #ifndef __APPLE__
+        window_flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+    #endif
     
     if (fullscreen) {
         window_flags |= SDL_WINDOW_FULLSCREEN;
     }
     
-    SDL_Window* window = SDL_CreateWindow("SDL2 Game",
+    SDL_Window* window = SDL_CreateWindow("RPG Game",
                                         SDL_WINDOWPOS_CENTERED,
                                         SDL_WINDOWPOS_CENTERED,
                                         SCREEN_W, SCREEN_H,
@@ -44,6 +55,16 @@ static SDL_Window* init_window(int SCREEN_W, int SCREEN_H, bool fullscreen) {
         printf("Window creation failed: %s\n", SDL_GetError());
         exit(EXIT_FAILURE);
     }
+    
+    // Forçar o tamanho correto no macOS
+    #ifdef __APPLE__
+        SDL_SetWindowSize(window, SCREEN_W, SCREEN_H);
+        
+        // Verificar se o tamanho foi aplicado corretamente
+        int actual_w, actual_h;
+        SDL_GetWindowSize(window, &actual_w, &actual_h);
+        SDL_Log("Requested size: %dx%d, Actual size: %dx%d", SCREEN_W, SCREEN_H, actual_w, actual_h);
+    #endif
     
     float ddpi, hdpi, vdpi;
     if (SDL_GetDisplayDPI(0, &ddpi, &hdpi, &vdpi) == 0) {
@@ -129,6 +150,25 @@ InitialScreen* init_initial_screen() {
     screen->clear = cleanup;
     
     return screen;
+}
+
+void apply_resolution_change(InitialScreen* screen, int new_width, int new_height) {
+    if (!screen || !screen->window) return;
+    
+    printf("Applying resolution change to %dx%d\n", new_width, new_height);
+    
+    // Atualizar tamanho da janela
+    SDL_SetWindowSize(screen->window, new_width, new_height);
+    SDL_SetWindowPosition(screen->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+    
+    // Atualizar valores do screen
+    screen->screen_width = new_width;
+    screen->screen_height = new_height;
+    
+    // Verificar se foi aplicado corretamente
+    int actual_w, actual_h;
+    SDL_GetWindowSize(screen->window, &actual_w, &actual_h);
+    printf("Resolution applied: %dx%d\n", actual_w, actual_h);
 }
 
 void toggle_fullscreen(SDL_Window* window, bool* fullscreen) {
