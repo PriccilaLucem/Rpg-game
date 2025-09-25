@@ -17,6 +17,7 @@ typedef struct Config {
     int music_volume;
     int effects_volume;
     int voice_volume;
+    int font_size;
 } Config;
 
 Config* load_config();

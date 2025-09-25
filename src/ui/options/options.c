@@ -1,11 +1,13 @@
 #include "./options.h"
 #include "../../states/states.h"
 #include "../../config/config.h"
+#include "../../screen/screen.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 extern SDL_Window* window;
+extern InitialScreen* screen;
 
 /* ===== CONSTANTS AND GLOBALS ===== */
 ScreenResolution available_resolutions[] = {
@@ -209,7 +211,6 @@ void screen_size_left_arrow_onClick(void* data) {
     
     current_resolution_index = (current_resolution_index - 1 + num_resolutions) % num_resolutions;
     update_screen_size_button_text(options, options->renderer);
-    apply_resolution(options);
 }
 
 void screen_size_right_arrow_onClick(void* data) {
@@ -218,7 +219,7 @@ void screen_size_right_arrow_onClick(void* data) {
     
     current_resolution_index = (current_resolution_index + 1) % num_resolutions;
     update_screen_size_button_text(options, options->renderer);
-    apply_resolution(options);
+    (options);
 }
 
 void handle_options_input(SDL_Event* event, Options* options) {
@@ -272,14 +273,19 @@ void apply_resolution(Options* options) {
     if (!options || !options->config) return;
     
     ScreenResolution res = available_resolutions[current_resolution_index];
-    SDL_SetWindowSize(window, res.width, res.height);
     
+    // Aplicar mudança de resolução usando a nova função
+    apply_resolution_change(screen, res.width, res.height);
+    
+    // Atualizar config
     options->config->screen_width = res.width;
     options->config->screen_height = res.height;
-    
+    // Salvar e atualizar interface
     save_config(options->config);
     update_options(options);
     update_button_geometry(options, res.width, res.height);
+    
+    printf("Resolution changed to %dx%d\n", res.width, res.height);
 }
 
 /* ===== PRIVATE FUNCTION IMPLEMENTATIONS ===== */
@@ -522,6 +528,7 @@ static void handle_voice_volume_click(Options* options) {
 
 static void handle_save_click(Options* options) {
     save_config(options->config);
+    apply_resolution(options);
 }
 
 

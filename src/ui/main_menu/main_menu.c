@@ -1,4 +1,7 @@
 #include "main_menu.h"
+#include <string.h>
+
+static void load_game_config(Menu* menu);
 
 static void handle_start_button(void* data){
     change_state(STATE_GAME);
@@ -19,19 +22,22 @@ static void handle_load_game_button(void* data){
 
 Menu* init_menu(int screen_width, int screen_height, int font_size) {
     
-    
     Menu* menu = malloc(sizeof(Menu));
     if (menu == NULL) {
         printf("Failed to allocate memory for Menu\n");
         exit(EXIT_FAILURE);
     }
-    // menu->music = init_music();
-
-    menu->screen_size_h = screen_height;
-    menu->screen_size_w = screen_width;
-    menu->font_size = font_size;
     
-    menu->title = TTF_OpenFont(MENU_FONT_PATH, font_size * 2); 
+    // Inicializar todos os campos com zero
+    memset(menu, 0, sizeof(Menu));
+    
+    // Definir valores básicos primeiro
+    menu->screen_size_w = screen_width;
+    menu->screen_size_h = screen_height;
+    menu->font_size = font_size;
+    menu->selected_index = 0;
+
+    load_game_config(menu);
     
     if (menu->title == NULL) {
         printf("Failed to load title font: %s\n", TTF_GetError());
@@ -115,7 +121,7 @@ void render_menu(Menu* menu, SDL_Renderer* renderer){
         printf("Menu or renderer is NULL\n");
         exit(EXIT_FAILURE);
     }
-
+    
     render_menu_title(menu, renderer, "Game menu");
 
     render_button(menu->start_game, renderer);
@@ -219,6 +225,21 @@ void free_main_menu(Menu* menu) {
         if (menu->load_game) free_button(menu->load_game);
         if (menu->options) free_button(menu->options);
         if (menu->exit) free_button(menu->exit);
+        if (menu->config) free_config(menu->config);
         free(menu);
     }
+}
+
+
+static void load_game_config(Menu* menu){
+    menu->config = load_config();
+    if(!menu->config){
+        printf("Failed to load config file\n");
+        exit(EXIT_FAILURE);
+    }
+    // Usar valores já definidos ou do config
+    if (menu->screen_size_w == 0) menu->screen_size_w = menu->config->screen_width;
+    if (menu->screen_size_h == 0) menu->screen_size_h = menu->config->screen_height;
+    
+    menu->title = TTF_OpenFont(MENU_FONT_PATH, menu->font_size * 2);
 }

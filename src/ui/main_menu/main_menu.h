@@ -9,8 +9,11 @@
 #include "../button/button.h"
 #include "../button/button.h"
 #include "../../constants/constants.h"
+#include "../../config/config.h"
 #include "../../states/states.h"
+
 typedef struct Menu {
+    Config* config;
     int id;
     Music* music;
     TTF_Font* title;
