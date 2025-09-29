@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include "../constants/constants.h"
+#include "stdbool.h"
 
 typedef struct Options Options;
 typedef struct Menu Menu;

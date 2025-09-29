@@ -49,7 +49,7 @@ void update_state(Menu* main_menu, Options* options, Game* game) {
     }
 }
 
-void render_state(SDL_Renderer* renderer, Menu* menu, Options* options, Game* game) {
+void render_state(SDL_Renderer* renderer, Menu* menu, Options* options) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     
