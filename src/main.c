@@ -17,7 +17,6 @@ GameState current_state = STATE_MAIN_MENU;
 InitialScreen* screen = NULL;
 Menu* main_menu = NULL;
 Options* options = NULL;
-Game* game = NULL;
 
 #if defined(_WIN32) || defined(WIN32)
     int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow){
@@ -58,7 +57,7 @@ Game* game = NULL;
         SDL_RenderClear(screen->renderer);
 
         // Render do estado atual
-        render_state(screen->renderer, main_menu, options, game);
+        render_state(screen->renderer, main_menu, options);
 
         // Update screen
         SDL_RenderPresent(screen->renderer);

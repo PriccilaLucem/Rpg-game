@@ -528,7 +528,6 @@ static void handle_voice_volume_click(Options* options) {
 
 static void handle_save_click(Options* options) {
     save_config(options->config);
-    apply_resolution(options);
 }
 
 
