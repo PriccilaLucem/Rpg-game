@@ -1,0 +1,21 @@
+{
+  "options" :   {
+    "BTN_FULLSCREEN": "FULL SCREEN: OFF",
+    "BTN_VSYNC": "VSYNC: OFF",
+    "BTN_SOUND": "SOUND: ON",
+    "BTN_VOLUME": "VOLUME: 100",
+    "BTN_ANTIALIASING": "ANTIALIASING: ON",
+    "BTN_MUSIC_VOLUME": "MUSIC VOLUME: 0",
+    "BTN_EFFECTS_VOLUME": "EFFECTS VOLUME: 70",
+    "BTN_VOICE_VOLUME": "VOICE VOLUME: 75",
+    "BTN_SAVE": "SAVE",
+    "BTN_RESET": "RESET TO DEFAULT",
+    "BTN_BACK": "BACK TO MAIN MENU"
+    },
+    "main_menu":{
+        "START_GAME": "START_GAME",
+        "LOAD_GAME": "LOAD_GAME",
+        "OPTIONS": "OPTIONS",
+        "EXIT": "EXIT"
+    }
+}
