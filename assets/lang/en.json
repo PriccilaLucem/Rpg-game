@@ -1,5 +1,6 @@
 {
   "options" :   {
+    "TITLE": "OPTIONS",
     "BTN_FULLSCREEN": "FULL SCREEN: OFF",
     "BTN_VSYNC": "VSYNC: OFF",
     "BTN_SOUND": "SOUND: ON",

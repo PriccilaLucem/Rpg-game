@@ -7,7 +7,6 @@
 #include "./ui/main_menu/main_menu.h"
 #include "./ui/options/options.h"
 #include "./load_obj/load_obj.h"
-#include "./game/game.h"
 
 
 OBJ_Model* obj_model = NULL;

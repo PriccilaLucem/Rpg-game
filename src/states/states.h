@@ -16,10 +16,7 @@ extern GameState current_state;
 extern Options* options;
 extern SDL_Window* window;
 extern OBJ_Model* obj_model;
-
 extern InitialScreen* screen;
-
-Game* game;
 
 void change_state(GameState new_state);
 void handle_state_input(SDL_Event* event);

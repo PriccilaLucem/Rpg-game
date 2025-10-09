@@ -1,4 +1,8 @@
-#include "./options.h"
+#include "options.h"
+#include "options_geometry.h"
+#include "options_handlers.h"
+#include "options_render.h"
+#include "../../lang/language.h"
 #include "../../states/states.h"
 #include "../../config/config.h"
 #include "../../screen/screen.h"
@@ -18,29 +22,6 @@ ScreenResolution available_resolutions[] = {
 
 int current_resolution_index = 0;
 const int num_resolutions = sizeof(available_resolutions) / sizeof(available_resolutions[0]);
-
-/* ===== PRIVATE FUNCTION DECLARATIONS ===== */
-static void setup_button_geometry(Options* options, int screen_width, int screen_height);
-static void create_title_texture(Options* options, SDL_Renderer* renderer);
-static void initialize_buttons_textures(Options* options);
-static void update_all_buttons_textures(Options* options);
-static void handle_mouse_motion(Options* options, int mouse_x, int mouse_y);
-static void handle_mouse_click(Options* options, int mouse_x, int mouse_y);
-static void render_title(Options* options, SDL_Renderer* renderer, int screen_width);
-static void render_all_buttons(Options* options, SDL_Renderer* renderer);
-
-// Button handler functions
-static void handle_fullscreen_toggle(Options* options);
-static void handle_vsync_toggle(Options* options);
-static void handle_sound_toggle(Options* options);
-static void handle_volume_click(Options* options);
-static void handle_antialiasing_click(Options* options);
-static void handle_music_volume_click(Options* options);
-static void handle_effects_volume_click(Options* options);
-static void handle_voice_volume_click(Options* options);
-static void handle_save_click(Options* options);
-static void handle_reset_click(Options* options);
-static void handle_back_to_main_menu();
 
 /* ===== PUBLIC FUNCTION IMPLEMENTATIONS ===== */
 
@@ -87,6 +68,11 @@ Options* init_options(int width, int height, SDL_Renderer* renderer, int font_si
     Options* options = malloc(sizeof(Options));
     if (!options) {
         printf("Failed to allocate memory for Options\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!load_language("pt")) {
+        printf("Failed to load language file\n");
+        free(options);
         exit(EXIT_FAILURE);
     }
 
@@ -155,45 +141,157 @@ void update_button_texture(Button* button, SDL_Renderer* renderer, TTF_Font* fon
     
     if (button->texture) {
         SDL_DestroyTexture(button->texture);
+        button->texture = NULL;
     }
-    
-    button->texture = create_text_texture(renderer, font, button->label, (SDL_Color){255, 255, 255, 255});
+
+    const char* translated_label = get_text_from_key(button->label);
+
+    button->texture = create_text_texture(
+        renderer,
+        font,
+        translated_label ? translated_label : button->label, 
+        (SDL_Color){255, 255, 255, 255}
+    );
 }
 
 void update_options(Options* options) {
     if (!options || !options->config) return;
 
-    // Update button labels
-    char buffer[50];
+    // Update button labels with translations
+    char buffer[100];
     
-    snprintf(buffer, sizeof(buffer), "Full Screen: %s", options->config->fullscreen ? "ON" : "OFF");
+    // Full Screen
+    const char* fullscreen_base = get_text_from_key("options.BTN_FULLSCREEN");
+    if (fullscreen_base) {
+        // Extract the base text without the status
+        char base[80];
+        strncpy(base, fullscreen_base, sizeof(base));
+        char* colon_pos = strchr(base, ':');
+        if (colon_pos) {
+            *colon_pos = '\0'; // Truncate at the colon
+        }
+        snprintf(buffer, sizeof(buffer), "%s: %s", base, 
+                options->config->fullscreen ? "ON" : "OFF");
+    } else {
+        snprintf(buffer, sizeof(buffer), "Full Screen: %s", 
+                options->config->fullscreen ? "ON" : "OFF");
+    }
     strncpy(options->full_screen->label, buffer, MAX_BUTTON_LENGTH);
 
-    snprintf(buffer, sizeof(buffer), "VSync: %s", options->config->vsync ? "ON" : "OFF");
+    // VSync
+    const char* vsync_base = get_text_from_key("options.BTN_VSYNC");
+    if (vsync_base) {
+        char base[80];
+        strncpy(base, vsync_base, sizeof(base));
+        char* colon_pos = strchr(base, ':');
+        if (colon_pos) {
+            *colon_pos = '\0';
+        }
+        snprintf(buffer, sizeof(buffer), "%s: %s", base, 
+                options->config->vsync ? "ON" : "OFF");
+    } else {
+        snprintf(buffer, sizeof(buffer), "VSync: %s", 
+                options->config->vsync ? "ON" : "OFF");
+    }
     strncpy(options->vsync->label, buffer, MAX_BUTTON_LENGTH);
 
-    snprintf(buffer, sizeof(buffer), "Sound: %s", options->config->sound_enabled ? "ON" : "OFF");
+    // Sound
+    const char* sound_base = get_text_from_key("options.BTN_SOUND");
+    if (sound_base) {
+        char base[80];
+        strncpy(base, sound_base, sizeof(base));
+        char* colon_pos = strchr(base, ':');
+        if (colon_pos) {
+            *colon_pos = '\0';
+        }
+        snprintf(buffer, sizeof(buffer), "%s: %s", base, 
+                options->config->sound_enabled ? "ON" : "OFF");
+    } else {
+        snprintf(buffer, sizeof(buffer), "Sound: %s", 
+                options->config->sound_enabled ? "ON" : "OFF");
+    }
     strncpy(options->sound->label, buffer, MAX_BUTTON_LENGTH);
 
-    snprintf(buffer, sizeof(buffer), "Volume: %d", options->config->volume_level);
+    // Volume
+    const char* volume_base = get_text_from_key("options.BTN_VOLUME");
+    if (volume_base) {
+        char base[80];
+        strncpy(base, volume_base, sizeof(base));
+        char* colon_pos = strchr(base, ':');
+        if (colon_pos) {
+            *colon_pos = '\0';
+        }
+        snprintf(buffer, sizeof(buffer), "%s: %d", base, options->config->volume_level);
+    } else {
+        snprintf(buffer, sizeof(buffer), "Volume: %d", options->config->volume_level);
+    }
     strncpy(options->volume->label, buffer, MAX_BUTTON_LENGTH);
 
-    snprintf(buffer, sizeof(buffer), "Antialiasing: %s", options->config->antialiasing ? "ON" : "OFF");
+    // Antialiasing
+    const char* aa_base = get_text_from_key("options.BTN_ANTIALIASING");
+    if (aa_base) {
+        char base[80];
+        strncpy(base, aa_base, sizeof(base));
+        char* colon_pos = strchr(base, ':');
+        if (colon_pos) {
+            *colon_pos = '\0';
+        }
+        snprintf(buffer, sizeof(buffer), "%s: %s", base, 
+                options->config->antialiasing ? "ON" : "OFF");
+    } else {
+        snprintf(buffer, sizeof(buffer), "Antialiasing: %s", 
+                options->config->antialiasing ? "ON" : "OFF");
+    }
     strncpy(options->antialiasing->label, buffer, MAX_BUTTON_LENGTH);
 
-    snprintf(buffer, sizeof(buffer), "Music Volume: %d", options->config->music_volume);
+    // Music Volume
+    const char* music_base = get_text_from_key("options.BTN_MUSIC_VOLUME");
+    if (music_base) {
+        char base[80];
+        strncpy(base, music_base, sizeof(base));
+        char* colon_pos = strchr(base, ':');
+        if (colon_pos) {
+            *colon_pos = '\0';
+        }
+        snprintf(buffer, sizeof(buffer), "%s: %d", base, options->config->music_volume);
+    } else {
+        snprintf(buffer, sizeof(buffer), "Music Volume: %d", options->config->music_volume);
+    }
     strncpy(options->music_volume->label, buffer, MAX_BUTTON_LENGTH);
 
-    snprintf(buffer, sizeof(buffer), "Effects Volume: %d", options->config->effects_volume);
+    // Effects Volume
+    const char* effects_base = get_text_from_key("options.BTN_EFFECTS_VOLUME");
+    if (effects_base) {
+        char base[80];
+        strncpy(base, effects_base, sizeof(base));
+        char* colon_pos = strchr(base, ':');
+        if (colon_pos) {
+            *colon_pos = '\0';
+        }
+        snprintf(buffer, sizeof(buffer), "%s: %d", base, options->config->effects_volume);
+    } else {
+        snprintf(buffer, sizeof(buffer), "Effects Volume: %d", options->config->effects_volume);
+    }
     strncpy(options->effects_volume->label, buffer, MAX_BUTTON_LENGTH);
 
-    snprintf(buffer, sizeof(buffer), "Voice Volume: %d", options->config->voice_volume);
+    // Voice Volume
+    const char* voice_base = get_text_from_key("options.BTN_VOICE_VOLUME");
+    if (voice_base) {
+        char base[80];
+        strncpy(base, voice_base, sizeof(base));
+        char* colon_pos = strchr(base, ':');
+        if (colon_pos) {
+            *colon_pos = '\0';
+        }
+        snprintf(buffer, sizeof(buffer), "%s: %d", base, options->config->voice_volume);
+    } else {
+        snprintf(buffer, sizeof(buffer), "Voice Volume: %d", options->config->voice_volume);
+    }
     strncpy(options->voice_volume->label, buffer, MAX_BUTTON_LENGTH);
 
     // Update button textures
     update_all_buttons_textures(options);
 }
-
 void update_screen_size_button_text(Options* options, SDL_Renderer* renderer) {
     if (!options || !renderer) return;
     
@@ -219,7 +317,6 @@ void screen_size_right_arrow_onClick(void* data) {
     
     current_resolution_index = (current_resolution_index + 1) % num_resolutions;
     update_screen_size_button_text(options, options->renderer);
-    (options);
 }
 
 void handle_options_input(SDL_Event* event, Options* options) {
@@ -241,10 +338,11 @@ void handle_options_input(SDL_Event* event, Options* options) {
     }
 }
 
-void render_options(Options* options, SDL_Renderer* renderer ) {
+void render_options(Options* options, SDL_Renderer* renderer) {
     if (!options || !renderer) return;
     int current_width, current_height;
     SDL_GetWindowSize(window, &current_width, &current_height);
+    
     // Clear screen
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
@@ -253,15 +351,6 @@ void render_options(Options* options, SDL_Renderer* renderer ) {
 
     // Render all buttons
     render_all_buttons(options, renderer);
-
-}
-
-void set_button_geometry(Button* button, int x, int y, int width, int height) {
-    if (!button) return;
-    button->x = x;
-    button->y = y;
-    button->width = width;
-    button->height = height;
 }
 
 void update_button_geometry(Options* options, int screen_width, int screen_height) {
@@ -286,272 +375,4 @@ void apply_resolution(Options* options) {
     update_button_geometry(options, res.width, res.height);
     
     printf("Resolution changed to %dx%d\n", res.width, res.height);
-}
-
-/* ===== PRIVATE FUNCTION IMPLEMENTATIONS ===== */
-
-static void setup_button_geometry(Options* options, int screen_width, int screen_height) {
-    float scale_factor = (float)screen_height / 720.0f;
-    
-    // Calculate dimensions
-    int button_height = (int)(60 * scale_factor);
-    int left_column_width = (int)(350 * scale_factor);
-    int right_column_width = (int)(280 * scale_factor);
-    int padding_top_bottom = (int)(80 * scale_factor);
-    int arrow_button_width = (int)(50 * scale_factor);
-    int main_button_width = (int)(180 * scale_factor);
-    int column_spacing = (int)(100 * scale_factor);
-
-    // Calculate spacing
-    int available_height = screen_height - (padding_top_bottom * 2);
-    int spacing_y_left = (available_height - (9 * button_height)) / 10;
-    int spacing_y_right = (available_height - (4 * button_height)) / 5;
-
-    // Calculate positions
-    int total_columns_width = left_column_width + right_column_width + column_spacing;
-    int start_x = (screen_width - total_columns_width) / 2;
-
-    int left_x = start_x;
-    int right_x = start_x + left_column_width + column_spacing;
-    int left_y = padding_top_bottom + spacing_y_left;
-    int right_y = padding_top_bottom + spacing_y_right;
-
-    // Left column buttons
-    options->screen_size_left_arrow = init_button(left_x, left_y, arrow_button_width, button_height, "<", false, false, options->button_font);
-    options->screen_size = init_button(left_x + arrow_button_width + 10, left_y, main_button_width, button_height, "1280x720", false, false, options->button_font);
-    options->screen_size_right_arrow = init_button(left_x + arrow_button_width + main_button_width + 20, left_y, arrow_button_width, button_height, ">", false, false, options->button_font);
-
-    left_y += button_height + spacing_y_left;
-    options->full_screen = init_button(left_x, left_y, left_column_width, button_height, "FULL SCREEN: OFF", false, false, options->button_font);
-    
-    left_y += button_height + spacing_y_left;
-    options->vsync = init_button(left_x, left_y, left_column_width, button_height, "VSYNC: OFF", false, false, options->button_font);
-    
-    left_y += button_height + spacing_y_left;
-    options->sound = init_button(left_x, left_y, left_column_width, button_height, "SOUND: ON", false, false, options->button_font);
-    
-    left_y += button_height + spacing_y_left;
-    options->volume = init_button(left_x, left_y, left_column_width, button_height, "VOLUME: 100", false, false, options->button_font);
-    
-    left_y += button_height + spacing_y_left;
-    options->antialiasing = init_button(left_x, left_y, left_column_width, button_height, "ANTIALIASING: ON", false, false, options->button_font);
-    
-    left_y += button_height + spacing_y_left;
-    options->music_volume = init_button(left_x, left_y, left_column_width, button_height, "MUSIC VOLUME: 0", false, false, options->button_font);
-    
-    left_y += button_height + spacing_y_left;
-    options->effects_volume = init_button(left_x, left_y, left_column_width, button_height, "EFFECTS VOLUME: 70", false, false, options->button_font);
-    
-    left_y += button_height + spacing_y_left;
-    options->voice_volume = init_button(left_x, left_y, left_column_width, button_height, "VOICE VOLUME: 75", false, false, options->button_font);
-
-    // Right column buttons
-    options->save = init_button(right_x, right_y, right_column_width, button_height, "SAVE", false, false, options->button_font);
-    right_y += button_height + spacing_y_right;
-    
-    options->reset = init_button(right_x, right_y, right_column_width, button_height, "RESET TO DEFAULT", false, false, options->button_font);
-    right_y += button_height + spacing_y_right;
-    
-    options->back_to_main_menu = init_button(right_x, right_y, right_column_width, button_height, "BACK TO MAIN MENU", false, false, options->button_font);
-}
-
-static void create_title_texture(Options* options, SDL_Renderer* renderer) {
-    options->texture = create_text_texture(renderer, options->screen_title_font, "Options!", (SDL_Color){255, 255, 255, 255});
-
-
-    Button* buttons[] = {
-        options->screen_size_left_arrow, options->screen_size_right_arrow, options->screen_size,
-        options->full_screen, options->vsync, options->sound, options->volume,
-        options->antialiasing, options->music_volume, options->effects_volume,
-        options->voice_volume, options->save, options->reset,
-        options->back_to_main_menu, NULL
-    };
-
-    for (int i = 0; buttons[i] != NULL; i++) {
-        update_button_texture(buttons[i], options->renderer, options->button_font);
-        }
-    
-}
-static void update_all_buttons_textures(Options* options) {
-    Button* buttons[] = {
-        options->full_screen, options->vsync, options->sound, options->volume,
-        options->antialiasing, options->music_volume, options->effects_volume,
-        options->voice_volume, NULL
-    };
-
-    for (int i = 0; buttons[i] != NULL; i++) {
-        update_button_texture(buttons[i], options->renderer, options->button_font);
-    }
-}
-
-static void handle_mouse_motion(Options* options, int mouse_x, int mouse_y) {
-    Button* buttons[] = {
-        options->screen_size_left_arrow, options->screen_size_right_arrow, options->screen_size,
-        options->full_screen, options->vsync, options->sound, options->volume,
-        options->antialiasing, options->music_volume, options->effects_volume,
-        options->voice_volume, options->save, options->reset,
-        options->back_to_main_menu, NULL
-    };
-
-    for (int i = 0; buttons[i] != NULL; i++) {
-        check_button_hover(buttons[i], mouse_x, mouse_y);
-    }
-}
-
-static void handle_mouse_click(Options* options, int mouse_x, int mouse_y) {
-    // Handle resolution buttons
-    if (check_button_click(options->screen_size_left_arrow, mouse_x, mouse_y)) {
-        screen_size_left_arrow_onClick(options);
-        return;
-    }
-    if (check_button_click(options->screen_size_right_arrow, mouse_x, mouse_y)) {
-        screen_size_right_arrow_onClick(options);
-        return;
-    }
-
-    // Handle configuration buttons
-    if (check_button_click(options->full_screen, mouse_x, mouse_y)) {
-        handle_fullscreen_toggle(options);
-    }
-    else if (check_button_click(options->vsync, mouse_x, mouse_y)) {
-        handle_vsync_toggle(options);
-    }
-    else if (check_button_click(options->sound, mouse_x, mouse_y)) {
-        handle_sound_toggle(options);
-    }
-    else if (check_button_click(options->volume, mouse_x, mouse_y)) {
-        handle_volume_click(options);
-    }
-    else if (check_button_click(options->antialiasing, mouse_x, mouse_y)) {
-        handle_antialiasing_click(options);
-    }
-    else if (check_button_click(options->music_volume, mouse_x, mouse_y)) {
-        handle_music_volume_click(options);
-    }
-    else if (check_button_click(options->effects_volume, mouse_x, mouse_y)) {
-        handle_effects_volume_click(options);
-    }
-    else if (check_button_click(options->voice_volume, mouse_x, mouse_y)) {
-        handle_voice_volume_click(options);
-    }
-    else if (check_button_click(options->save, mouse_x, mouse_y)) {
-        handle_save_click(options);
-    }
-
-    else if (check_button_click(options->reset, mouse_x, mouse_y)) {
-        handle_reset_click(options);
-    }
-    else if (check_button_click(options->back_to_main_menu, mouse_x, mouse_y)) {
-        handle_back_to_main_menu();
-    }
-}
-
-static void render_title(Options* options, SDL_Renderer* renderer, int screen_width) {
-    if (!options->texture) return;
-    
-    int textW, textH;
-    SDL_QueryTexture(options->texture, NULL, NULL, &textW, &textH);
-    
-    SDL_Rect title_dest = {
-        .x = (screen_width - textW) / 2,
-        .y = 20,
-        .w = textW,
-        .h = textH
-    };
-    
-    SDL_RenderCopy(renderer, options->texture, NULL, &title_dest);
-}
-
-static void render_all_buttons(Options* options, SDL_Renderer* renderer) {
-    Button* buttons[] = {
-        options->screen_size_left_arrow, options->screen_size_right_arrow, options->screen_size,
-        options->full_screen, options->vsync, options->sound, options->volume,
-        options->antialiasing, options->music_volume, options->effects_volume,
-        options->voice_volume, options->save, options->reset,
-        options->back_to_main_menu, NULL
-    };
-
-    for (int i = 0; buttons[i] != NULL; i++) {
-        render_button(buttons[i], renderer);
-    }
-}
-
-/* ===== BUTTON HANDLER FUNCTIONS ===== */
-
-static void handle_fullscreen_toggle(Options* options) {
-    options->config->fullscreen = !options->config->fullscreen;
-    SDL_SetWindowFullscreen(window, options->config->fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
-    update_options(options);
-}
-
-static void handle_vsync_toggle(Options* options) {
-    options->config->vsync = !options->config->vsync;
-    update_options(options);
-}
-
-static void handle_sound_toggle(Options* options) {
-    options->config->sound_enabled = !options->config->sound_enabled;
-    update_options(options);
-}
-
-static void handle_volume_click(Options* options) {
-    options->config->volume_level = (options->config->volume_level + 10) % 110;
-    if (options->config->volume_level == 0) options->config->volume_level = 10;
-    update_options(options);
-}
-
-static void handle_antialiasing_click(Options* options) {
-    if (options->config->antialiasing == 0) options->config->antialiasing = 2;
-    else if (options->config->antialiasing == 2) options->config->antialiasing = 4;
-    else if (options->config->antialiasing == 4) options->config->antialiasing = 8;
-    else options->config->antialiasing = 0;
-    update_options(options);
-}
-
-static void handle_music_volume_click(Options* options) {
-    options->config->music_volume = (options->config->music_volume + 10) % 110;
-    if (options->config->music_volume == 0) options->config->music_volume = 10;
-    update_options(options);
-}
-
-static void handle_effects_volume_click(Options* options) {
-    options->config->effects_volume = (options->config->effects_volume + 10) % 110;
-    if (options->config->effects_volume == 0) options->config->effects_volume = 10;
-    update_options(options);
-}
-
-static void handle_voice_volume_click(Options* options) {
-    options->config->voice_volume = (options->config->voice_volume + 10) % 110;
-    if (options->config->voice_volume == 0) options->config->voice_volume = 10;
-    update_options(options);
-}
-
-static void handle_save_click(Options* options) {
-    save_config(options->config);
-}
-
-
-
-static void handle_reset_click(Options* options) {
-    reset_config_to_defaults(options->config);
-    save_config(options->config);
-    update_options(options);
-}
-
-static void handle_back_to_main_menu() {
-    change_state(STATE_MAIN_MENU);
-}
-
-static void initialize_buttons_textures(Options* options) {
-    Button* buttons[] = {
-        options->screen_size_left_arrow, options->screen_size_right_arrow, options->screen_size,
-        options->full_screen, options->vsync, options->sound, options->volume,
-        options->antialiasing, options->music_volume, options->effects_volume,
-        options->voice_volume, options->save, options->reset,
-        options->back_to_main_menu, NULL
-    };
-
-    for (int i = 0; buttons[i] != NULL; i++) {
-        update_button_texture(buttons[i], options->renderer, options->button_font);
-    }
 }

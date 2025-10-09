@@ -1,9 +1,10 @@
-#include "states.h"
+#include "./states.h"
 #include "../config/config.h"
 #include "../screen/screen.h"
 #include "../ui/main_menu/main_menu.h"
 #include "../ui/options/options.h"
-#include "../game/game.h"
+
+Game* game = NULL;
 
 void change_state(GameState new_state) {
     printf("Changing state from %d to %d\n", current_state, new_state);

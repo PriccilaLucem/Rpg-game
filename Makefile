@@ -58,6 +58,9 @@ SRCS = $(SRC_DIR)/main.c \
        $(SRC_DIR)/screen/screen.c \
        $(SRC_DIR)/load_obj/load_obj.c \
        $(SRC_DIR)/ui/options/options.c \
+       $(SRC_DIR)/ui/options/options_render.c \
+       $(SRC_DIR)/ui/options/options_handlers.c \
+       $(SRC_DIR)/ui/options/options_geometry.c \
        $(SRC_DIR)/structs/charater/basic_charater.c \
        $(SRC_DIR)/structs/charater/main_charater.c \
        $(SRC_DIR)/game/init_game/init_game.c \
@@ -66,7 +69,9 @@ SRCS = $(SRC_DIR)/main.c \
        $(SRC_DIR)/game/iso_camera/iso_camera.c \
        $(SRC_DIR)/game/game.c \
        $(SRC_DIR)/game/physics/physics.c \
-       $(LIB_DIR)/cJSON/cJSON.c
+       $(LIB_DIR)/cJSON/cJSON.c \
+	   $(SRC_DIR)/lang/language.c \
+	   $(SRC_DIR)/json_loader/json_loader.c
 
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(filter $(SRC_DIR)/%,$(SRCS))) \
         $(patsubst $(LIB_DIR)/%.c,$(OBJ_DIR)/%.o,$(filter $(LIB_DIR)/%,$(SRCS)))
