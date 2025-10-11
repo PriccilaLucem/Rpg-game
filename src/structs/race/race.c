@@ -7,12 +7,12 @@ Race* init_race(char race_type, const char race_name) {
     Race* race = malloc(sizeof(Race));
 
     if(!race){
-        fprintf(stderr, "ERROR IN ALLOCATING MEMORY TO RACE \n")
+        fprintf(stderr, "ERROR IN ALLOCATING MEMORY TO RACE \n");
         exit(EXIT_FAILURE);
     }
 
     race->id = get_num_state();
-    race->race_type = race_type
+    race->race_type = race_type;
     
     race->race_name = strncpy(race->race_name, race_name, MAX_NAME_LENGTH - 1); 
     race->race_name[MAX_NAME_LENGTH - 1] = '\0';

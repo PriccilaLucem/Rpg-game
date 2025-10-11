@@ -73,19 +73,27 @@ OBJ_Model* OBJ_Load(const char* filename) {
             }
         } else if (line[0] == 'f' && line[1] == ' ') {
             if (f_index < model->face_count) {
-                char* token = strtok(line + 2, " \t\n");
+                // Parse face line safely without strtok
+                char face_line[256];
+                strncpy(face_line, line + 2, sizeof(face_line) - 1);
+                face_line[sizeof(face_line) - 1] = '\0';
+                
                 int vertex_indices[4] = {0};
                 int vertex_count = 0;
+                char* ptr = face_line;
                 
-                while (token != NULL && vertex_count < 4) {
+                while (*ptr && vertex_count < 4) {
+                    // Skip whitespace
+                    while (*ptr == ' ' || *ptr == '\t') ptr++;
+                    if (!*ptr) break;
+                    
                     int v;
-                    if (sscanf(token, "%d", &v) == 1) {
+                    if (sscanf(ptr, "%d", &v) == 1) {
                         vertex_indices[vertex_count++] = v;
                     }
-                    // Avançar para próximo token
-                    char* slash = strchr(token, '/');
-                    if (slash) *slash = '\0';
-                    token = strtok(NULL, " \t\n");
+                    
+                    // Move to next token
+                    while (*ptr && *ptr != ' ' && *ptr != '\t' && *ptr != '\n') ptr++;
                 }
                 
                 if (vertex_count >= 3) {

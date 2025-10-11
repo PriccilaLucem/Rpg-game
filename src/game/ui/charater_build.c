@@ -17,7 +17,8 @@ charaterBuild* init_char_build(){
 
     char_build->input_field = init_input_field(100, 100, 200, 40, font, (SDL_Color){0,0,0,255});
     char_build->button = init_button(100, 150, 200, 40, "Cofirme o nome", false, false, font);
-    strncpy(char_build->title, "Crie seu personagem!", MAX_DESCRIPTION_LENGTH);
+    strncpy(char_build->title, "Crie seu personagem!", MAX_DESCRIPTION_LENGTH - 1);
+    char_build->title[MAX_DESCRIPTION_LENGTH - 1] = '\0';
     return char_build;
 }
 
@@ -27,7 +28,12 @@ void handle_input_char_build(charaterBuild* char_build, SDL_Renderer* renderer, 
     InputField* input = char_build->input_field;
 
     if (event->type == SDL_TEXTINPUT) {
-        strcat(input->text, event->text.text);
+        size_t current_len = strlen(input->text);
+        size_t input_len = strlen(event->text.text);
+        if (current_len + input_len < MAX_INPUT_LENGTH - 1) {
+            strncat(input->text, event->text.text, MAX_INPUT_LENGTH - current_len - 1);
+            input->text[MAX_INPUT_LENGTH - 1] = '\0';
+        }
     } else if (event->type == SDL_KEYDOWN) {
         if (event->key.keysym.sym == SDLK_BACKSPACE && strlen(input->text) > 0) {
             input->text[strlen(input->text) - 1] = '\0';

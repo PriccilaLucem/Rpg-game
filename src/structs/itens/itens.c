@@ -66,7 +66,7 @@ Itens* initItem(
     if (type >= ITEM_WEAPON && type <= ITEM_MISC) {
         item->item_type = type;
     } else {
-        fprintf(stderr, "Tipo de item inválido: %d\n", type);
+        fprintf(stderr, "Tipo de item inválido: %d\n", (int)type);
         free(item);
         return NULL;
     }

@@ -78,11 +78,17 @@ const char* get_text_from_key(const char* key) {
     printf("Looking up key: %s\n", key);  // Debug print
 
     char key_copy[128];
-    strncpy(key_copy, key, sizeof(key_copy));
+    strncpy(key_copy, key, sizeof(key_copy) - 1);
     key_copy[sizeof(key_copy) - 1] = '\0';
 
-    char* section = strtok(key_copy, ".");
-    char* subkey = strtok(NULL, ".");
+    char* section = NULL;
+    char* subkey = NULL;
+    char* dot_pos = strchr(key_copy, '.');
+    if (dot_pos) {
+        *dot_pos = '\0';
+        section = key_copy;
+        subkey = dot_pos + 1;
+    }
 
     if (!section || !subkey) {
         printf("Invalid key format: %s\n", key);

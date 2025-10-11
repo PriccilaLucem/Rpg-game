@@ -136,7 +136,6 @@ void handle_menu_input(Menu* menu, SDL_Event* event) {
     if (!menu || !event) return;
 
     int mouse_x, mouse_y;
-    int total_buttons = 4; // start, load, options, exit
 
     switch (event->type) {
         // ---------------- MOUSE ----------------

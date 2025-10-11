@@ -47,8 +47,11 @@ void handle_input_event(InputField* field, SDL_Event* e, SDL_Renderer* renderer)
                            my >= field->y && my <= field->y + field->height);
     }
     else if (e->type == SDL_TEXTINPUT && field->isActive) {
-        if (strlen(field->text) + strlen(e->text.text) < MAX_INPUT_LENGTH - 1) {
-            strcat(field->text, e->text.text);
+        size_t current_len = strlen(field->text);
+        size_t input_len = strlen(e->text.text);
+        if (current_len + input_len < MAX_INPUT_LENGTH - 1) {
+            strncat(field->text, e->text.text, MAX_INPUT_LENGTH - current_len - 1);
+            field->text[MAX_INPUT_LENGTH - 1] = '\0';
         }
     }
     else if (e->type == SDL_KEYDOWN && field->isActive) {

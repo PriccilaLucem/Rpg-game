@@ -30,17 +30,28 @@ Config* load_config(){
     FILE* file = fopen("config.conf", "r");
     if(file == NULL){
         printf("Config file not found, using defaults\n");
+        reset_config_to_defaults(config);
         return config; // Retorna config com valores padrão
     }
     char key[50];
     char value[50];
+    char *endptr;
+    long parsed_value;
+    
+    // Initialize with defaults first
+    reset_config_to_defaults(config);
+    
     while(fscanf(file, "%49[^=]=%49[^\n]\n", key, value) == 2){
         if(strcmp(key, "screen_width") == 0){
-            printf("CONFIG WIDTH");
-            config->screen_width = atoi(value);
+            parsed_value = strtol(value, &endptr, 10);
+            if(*endptr == '\0' && parsed_value > 0 && parsed_value <= 7680) {
+                config->screen_width = (int)parsed_value;
+            }
         } else if(strcmp(key, "screen_height") == 0){
-            printf("CONFIG HEIGHT");
-            config->screen_height = atoi(value);
+            parsed_value = strtol(value, &endptr, 10);
+            if(*endptr == '\0' && parsed_value > 0 && parsed_value <= 4320) {
+                config->screen_height = (int)parsed_value;
+            }
         } else if(strcmp(key, "fullscreen") == 0){
             config->fullscreen = (strcmp(value, "true") == 0);
         } else if(strcmp(key, "vsync") == 0){
@@ -48,17 +59,30 @@ Config* load_config(){
         } else if(strcmp(key, "sound_enabled") == 0){
             config->sound_enabled = (strcmp(value, "true") == 0);
         } else if(strcmp(key, "volume_level") == 0){
-            config->volume_level = atoi(value);
+            parsed_value = strtol(value, &endptr, 10);
+            if(*endptr == '\0' && parsed_value >= 0 && parsed_value <= 100) {
+                config->volume_level = (int)parsed_value;
+            }
         } else if(strcmp(key, "antialiasing") == 0){
             config->antialiasing = (strcmp(value, "true") == 0);
         } else if(strcmp(key, "music_volume") == 0){
-            config->music_volume = atoi(value);
+            parsed_value = strtol(value, &endptr, 10);
+            if(*endptr == '\0' && parsed_value >= 0 && parsed_value <= 100) {
+                config->music_volume = (int)parsed_value;
+            }
         } else if(strcmp(key, "effects_volume") == 0){
-            config->effects_volume = atoi(value);
+            parsed_value = strtol(value, &endptr, 10);
+            if(*endptr == '\0' && parsed_value >= 0 && parsed_value <= 100) {
+                config->effects_volume = (int)parsed_value;
+            }
         } else if(strcmp(key, "voice_volume") == 0){
-            config->voice_volume = atoi(value);
+            parsed_value = strtol(value, &endptr, 10);
+            if(*endptr == '\0' && parsed_value >= 0 && parsed_value <= 100) {
+                config->voice_volume = (int)parsed_value;
+            }
         }
     }
+    fclose(file);
     return config;
 }
 

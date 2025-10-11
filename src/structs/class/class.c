@@ -61,7 +61,7 @@ Class* init_base_class(char class_name, char description) {
             break;
 
         default:
-            fprintf("Unknown class type %d\n", class_name);
+            fprintf(stderr, "Unknown class type %d\n", class_name);
             free(class);
             exit(EXIT_FAILURE);
             break;

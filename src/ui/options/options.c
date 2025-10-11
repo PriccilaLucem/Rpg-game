@@ -165,7 +165,8 @@ void update_options(Options* options) {
     if (fullscreen_base) {
         // Extract the base text without the status
         char base[80];
-        strncpy(base, fullscreen_base, sizeof(base));
+        strncpy(base, fullscreen_base, sizeof(base) - 1);
+        base[sizeof(base) - 1] = '\0';
         char* colon_pos = strchr(base, ':');
         if (colon_pos) {
             *colon_pos = '\0'; // Truncate at the colon
@@ -176,13 +177,15 @@ void update_options(Options* options) {
         snprintf(buffer, sizeof(buffer), "Full Screen: %s", 
                 options->config->fullscreen ? "ON" : "OFF");
     }
-    strncpy(options->full_screen->label, buffer, MAX_BUTTON_LENGTH);
+    strncpy(options->full_screen->label, buffer, MAX_BUTTON_LENGTH - 1);
+    options->full_screen->label[MAX_BUTTON_LENGTH - 1] = '\0';
 
     // VSync
     const char* vsync_base = get_text_from_key("options.BTN_VSYNC");
     if (vsync_base) {
         char base[80];
-        strncpy(base, vsync_base, sizeof(base));
+        strncpy(base, vsync_base, sizeof(base) - 1);
+        base[sizeof(base) - 1] = '\0';
         char* colon_pos = strchr(base, ':');
         if (colon_pos) {
             *colon_pos = '\0';
@@ -193,13 +196,15 @@ void update_options(Options* options) {
         snprintf(buffer, sizeof(buffer), "VSync: %s", 
                 options->config->vsync ? "ON" : "OFF");
     }
-    strncpy(options->vsync->label, buffer, MAX_BUTTON_LENGTH);
+    strncpy(options->vsync->label, buffer, MAX_BUTTON_LENGTH - 1);
+    options->vsync->label[MAX_BUTTON_LENGTH - 1] = '\0';
 
     // Sound
     const char* sound_base = get_text_from_key("options.BTN_SOUND");
     if (sound_base) {
         char base[80];
-        strncpy(base, sound_base, sizeof(base));
+        strncpy(base, sound_base, sizeof(base) - 1);
+        base[sizeof(base) - 1] = '\0';
         char* colon_pos = strchr(base, ':');
         if (colon_pos) {
             *colon_pos = '\0';
@@ -210,13 +215,15 @@ void update_options(Options* options) {
         snprintf(buffer, sizeof(buffer), "Sound: %s", 
                 options->config->sound_enabled ? "ON" : "OFF");
     }
-    strncpy(options->sound->label, buffer, MAX_BUTTON_LENGTH);
+    strncpy(options->sound->label, buffer, MAX_BUTTON_LENGTH - 1);
+    options->sound->label[MAX_BUTTON_LENGTH - 1] = '\0';
 
     // Volume
     const char* volume_base = get_text_from_key("options.BTN_VOLUME");
     if (volume_base) {
         char base[80];
-        strncpy(base, volume_base, sizeof(base));
+        strncpy(base, volume_base, sizeof(base) - 1);
+        base[sizeof(base) - 1] = '\0';
         char* colon_pos = strchr(base, ':');
         if (colon_pos) {
             *colon_pos = '\0';
@@ -225,13 +232,15 @@ void update_options(Options* options) {
     } else {
         snprintf(buffer, sizeof(buffer), "Volume: %d", options->config->volume_level);
     }
-    strncpy(options->volume->label, buffer, MAX_BUTTON_LENGTH);
+    strncpy(options->volume->label, buffer, MAX_BUTTON_LENGTH - 1);
+    options->volume->label[MAX_BUTTON_LENGTH - 1] = '\0';
 
     // Antialiasing
     const char* aa_base = get_text_from_key("options.BTN_ANTIALIASING");
     if (aa_base) {
         char base[80];
-        strncpy(base, aa_base, sizeof(base));
+        strncpy(base, aa_base, sizeof(base) - 1);
+        base[sizeof(base) - 1] = '\0';
         char* colon_pos = strchr(base, ':');
         if (colon_pos) {
             *colon_pos = '\0';
@@ -242,13 +251,15 @@ void update_options(Options* options) {
         snprintf(buffer, sizeof(buffer), "Antialiasing: %s", 
                 options->config->antialiasing ? "ON" : "OFF");
     }
-    strncpy(options->antialiasing->label, buffer, MAX_BUTTON_LENGTH);
+    strncpy(options->antialiasing->label, buffer, MAX_BUTTON_LENGTH - 1);
+    options->antialiasing->label[MAX_BUTTON_LENGTH - 1] = '\0';
 
     // Music Volume
     const char* music_base = get_text_from_key("options.BTN_MUSIC_VOLUME");
     if (music_base) {
         char base[80];
-        strncpy(base, music_base, sizeof(base));
+        strncpy(base, music_base, sizeof(base) - 1);
+        base[sizeof(base) - 1] = '\0';
         char* colon_pos = strchr(base, ':');
         if (colon_pos) {
             *colon_pos = '\0';
@@ -257,13 +268,15 @@ void update_options(Options* options) {
     } else {
         snprintf(buffer, sizeof(buffer), "Music Volume: %d", options->config->music_volume);
     }
-    strncpy(options->music_volume->label, buffer, MAX_BUTTON_LENGTH);
+    strncpy(options->music_volume->label, buffer, MAX_BUTTON_LENGTH - 1);
+    options->music_volume->label[MAX_BUTTON_LENGTH - 1] = '\0';
 
     // Effects Volume
     const char* effects_base = get_text_from_key("options.BTN_EFFECTS_VOLUME");
     if (effects_base) {
         char base[80];
-        strncpy(base, effects_base, sizeof(base));
+        strncpy(base, effects_base, sizeof(base) - 1);
+        base[sizeof(base) - 1] = '\0';
         char* colon_pos = strchr(base, ':');
         if (colon_pos) {
             *colon_pos = '\0';
@@ -272,13 +285,15 @@ void update_options(Options* options) {
     } else {
         snprintf(buffer, sizeof(buffer), "Effects Volume: %d", options->config->effects_volume);
     }
-    strncpy(options->effects_volume->label, buffer, MAX_BUTTON_LENGTH);
+    strncpy(options->effects_volume->label, buffer, MAX_BUTTON_LENGTH - 1);
+    options->effects_volume->label[MAX_BUTTON_LENGTH - 1] = '\0';
 
     // Voice Volume
     const char* voice_base = get_text_from_key("options.BTN_VOICE_VOLUME");
     if (voice_base) {
         char base[80];
-        strncpy(base, voice_base, sizeof(base));
+        strncpy(base, voice_base, sizeof(base) - 1);
+        base[sizeof(base) - 1] = '\0';
         char* colon_pos = strchr(base, ':');
         if (colon_pos) {
             *colon_pos = '\0';
@@ -287,7 +302,8 @@ void update_options(Options* options) {
     } else {
         snprintf(buffer, sizeof(buffer), "Voice Volume: %d", options->config->voice_volume);
     }
-    strncpy(options->voice_volume->label, buffer, MAX_BUTTON_LENGTH);
+    strncpy(options->voice_volume->label, buffer, MAX_BUTTON_LENGTH - 1);
+    options->voice_volume->label[MAX_BUTTON_LENGTH - 1] = '\0';
 
     // Update button textures
     update_all_buttons_textures(options);
@@ -298,7 +314,8 @@ void update_screen_size_button_text(Options* options, SDL_Renderer* renderer) {
     ScreenResolution res = available_resolutions[current_resolution_index];
     char buffer[20];
     snprintf(buffer, sizeof(buffer), "%dx%d", res.width, res.height);
-    strncpy(options->screen_size->label, buffer, MAX_BUTTON_LENGTH);
+    strncpy(options->screen_size->label, buffer, MAX_BUTTON_LENGTH - 1);
+    options->screen_size->label[MAX_BUTTON_LENGTH - 1] = '\0';
 
     update_button_texture(options->screen_size, renderer, options->button_font);
 }
