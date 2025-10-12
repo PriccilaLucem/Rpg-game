@@ -141,23 +141,27 @@ Options* init_options(int width, int height, SDL_Renderer* renderer, int font_si
     }
 
     // Setup button geometry
-    setup_button_geometry(options, width, height);
-    
-    // Create title texture
-    create_title_texture(options, renderer);
-
-    // Initialize dropdowns
     options->resolution_dropdown = NULL;
     options->language_dropdown = NULL;
     init_resolution_dropdown(options);
     init_language_dropdown(options);
     
+    setup_button_geometry(options, width, height);
+    // Create title texture
+    create_title_texture(options, renderer);
+
+    printf("Title texture created successfully\n");
+    // Initialize dropdowns
+
+    
+    printf("Dropdowns initialized successfully\n");
     // Initialize button textures and states
     initialize_buttons_textures(options);
     current_resolution_index = find_current_resolution_index(
         options->config->screen_width, options->config->screen_height
     );
     
+    printf("Buttons textures initialized successfully\n");
     update_screen_size_button_text(options, renderer);
     update_options(options);
 

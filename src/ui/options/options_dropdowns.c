@@ -45,12 +45,15 @@ void init_resolution_dropdown(Options* options) {
     
     // Create dropdown items
     DropdownItem** items = malloc(num_resolutions * sizeof(DropdownItem*));
-    if (!items) return;
+    if(!items){
+        printf("Failed to allocate memory for resolution dropdown items\n");
+        return;
+    }
     
     for (int i = 0; i < num_resolutions; i++) {
         items[i] = malloc(sizeof(DropdownItem));
         if (!items[i]) {
-            // Cleanup on failure
+            printf("Failed to allocate memory for a resolution dropdown item\n");
             for (int j = 0; j < i; j++) {
                 free(items[j]);
             }
@@ -81,12 +84,16 @@ void init_language_dropdown(Options* options) {
     
     // Create dropdown items
     DropdownItem** items = malloc(num_languages * sizeof(DropdownItem*));
-    if (!items) return;
+    if (!items){
+        printf("Failed to allocate memory for language dropdown items\n");
+        return;
+    }
+
     
     for (int i = 0; i < num_languages; i++) {
         items[i] = malloc(sizeof(DropdownItem));
         if (!items[i]) {
-            // Cleanup on failure
+            printf("Failed to allocate memory for a language dropdown item\n");
             for (int j = 0; j < i; j++) {
                 free(items[j]);
             }
