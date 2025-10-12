@@ -10,7 +10,7 @@ Game* init_game(int screen_width, int screen_height, SDL_Renderer* renderer, int
     game->font = TTF_OpenFont(MENU_FONT_PATH, font_size);
     game->main_charater = NULL;
     game->char_build = init_char_build();
-    game->floor = init_floor_from_obj(renderer, "src/assets/floor/floor.obj", 100, 30);
+    game->floor = init_floor_from_obj(renderer, "assets/floor/floor.obj", 100, 30);
     game->game_enum = INITIAL_SCREEN;
     game->renderer = renderer;
 

@@ -402,38 +402,35 @@ void handle_options_input(SDL_Event* event, Options* options) {
 
 void render_options(Options* options, SDL_Renderer* renderer) {
     if (!options || !renderer) return;
-    int current_width, current_height;
-    SDL_GetWindowSize(window, &current_width, &current_height);
     
-    // Clear screen
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-
+    int current_width = 800, current_height = 600;
+    SDL_GetRendererOutputSize(renderer, &current_width, &current_height);
+    
     // Render title
     render_title(options, renderer, current_width);
 
-    // Render dropdowns with comprehensive safety checks
-    if (options->resolution_dropdown && options->resolution_dropdown->font && 
-        options->resolution_dropdown->text && strlen(options->resolution_dropdown->text) > 0) {
+    // Render dropdowns (only main dropdown, not options)
+    if (options->resolution_dropdown && options->resolution_dropdown->font) {
         render_button_dropdown(options->resolution_dropdown, renderer);
-        // Only render options when dropdown is active and has valid items
-        if (options->resolution_dropdown->isActive && options->resolution_dropdown->items && 
-            options->resolution_dropdown->itemCount > 0) {
-            render_button_dropdown_options(options->resolution_dropdown, renderer);
-        }
     }
     
-    if (options->language_dropdown && options->language_dropdown->font && 
-        options->language_dropdown->text && strlen(options->language_dropdown->text) > 0) {
+    if (options->language_dropdown && options->language_dropdown->font) {
         render_button_dropdown(options->language_dropdown, renderer);
-        // Only render options when dropdown is active and has valid items
-        if (options->language_dropdown->isActive && options->language_dropdown->items && 
-            options->language_dropdown->itemCount > 0) {
-            render_button_dropdown_options(options->language_dropdown, renderer);
-        }
     }
 
     // Render all buttons
     render_all_buttons(options, renderer);
+    
+    // Render dropdown options on top (if active)
+    if (options->resolution_dropdown && options->resolution_dropdown->isActive && 
+        options->resolution_dropdown->items && options->resolution_dropdown->itemCount > 0) {
+        render_button_dropdown_options(options->resolution_dropdown, renderer);
+    }
+    
+    if (options->language_dropdown && options->language_dropdown->isActive && 
+        options->language_dropdown->items && options->language_dropdown->itemCount > 0) {
+        render_button_dropdown_options(options->language_dropdown, renderer);
+    }
 }
 
 void change_language(Options* options, const char* lang_code) {
@@ -456,6 +453,11 @@ void change_language(Options* options, const char* lang_code) {
 void update_button_geometry(Options* options, int screen_width, int screen_height) {
     if (!options) return;
     setup_button_geometry(options, screen_width, screen_height);
+    
+    // Update dropdown text after geometry change
+    if (options->resolution_dropdown) {
+        update_resolution_dropdown_text(options);
+    }
 }
 
 void apply_resolution(Options* options) {

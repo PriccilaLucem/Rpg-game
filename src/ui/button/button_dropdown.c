@@ -24,7 +24,7 @@ ButtonDropdown* init_button_dropdown(int x, int y, int width, int height, int it
 } 
 
 void render_button_dropdown(ButtonDropdown* dropdown, SDL_Renderer* renderer) {
-    if (!dropdown || !renderer) return;
+    if (!dropdown || !renderer || !dropdown->font) return;
     
     SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
     SDL_RenderFillRect(renderer, &dropdown->rect);
@@ -32,7 +32,7 @@ void render_button_dropdown(ButtonDropdown* dropdown, SDL_Renderer* renderer) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); 
     SDL_RenderDrawRect(renderer, &dropdown->rect);
 
-    if (dropdown->text && strlen(dropdown->text) > 0 && dropdown->font) {
+    if (strlen(dropdown->text) > 0) {
         SDL_Surface* surface = TTF_RenderText_Solid(dropdown->font, dropdown->text, dropdown->textColor);
         if (surface) {
             SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
@@ -60,7 +60,7 @@ void render_button_dropdown_options(ButtonDropdown* dropdown, SDL_Renderer* rend
     SDL_Rect optionRect = {dropdown->x, dropdown->y + dropdown->height, dropdown->width, optionHeight};
 
     for (int i = 0; i < dropdown->itemCount && i < 10; i++) { // Limit to 10 items max
-        if (!dropdown->items[i] || !dropdown->items[i]->text) continue;
+        if (!dropdown->items[i]) continue;
         
         SDL_SetRenderDrawColor(renderer, 150, 150, 150, 255);
         SDL_RenderFillRect(renderer, &optionRect);

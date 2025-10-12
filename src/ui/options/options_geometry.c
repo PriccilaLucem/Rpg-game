@@ -3,16 +3,19 @@
 #include "../../lang/language.h"
 
 void setup_button_geometry(Options* options, int screen_width, int screen_height) {
-    // Base dimensions
-    int button_width = 300;
-    int button_height = 50;
-    int dropdown_width = 200;
-    int spacing_y = 20;
-    int section_spacing = 40;
+    // Responsive scaling based on resolution
+    float scale = (float)screen_height / 720.0f; // Base scale on 720p
+    
+    // Scaled dimensions
+    int button_width = (int)(300 * scale);
+    int button_height = (int)(50 * scale);
+    int dropdown_width = (int)(200 * scale);
+    int spacing_y = (int)(20 * scale);
+    int section_spacing = (int)(40 * scale);
     
     // Center everything
     int center_x = screen_width / 2;
-    int start_y = 120;
+    int start_y = (int)(120 * scale);
     
     // Current Y position tracker
     int current_y = start_y;

@@ -24,6 +24,7 @@ void resolution_dropdown_callback(void* data) {
             }
         }
     }
+
 }
 
 void language_dropdown_callback(void* data) {

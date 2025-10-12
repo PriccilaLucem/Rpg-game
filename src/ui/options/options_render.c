@@ -6,9 +6,14 @@ void render_title(Options* options, SDL_Renderer* renderer, int screen_width) {
     int texture_width, texture_height;
     SDL_QueryTexture(options->texture, NULL, NULL, &texture_width, &texture_height);
     
+    // Get screen height for responsive positioning
+    int screen_height;
+    SDL_GetRendererOutputSize(renderer, NULL, &screen_height);
+    float scale = (float)screen_height / 720.0f;
+    
     SDL_Rect dest_rect = {
         (screen_width - texture_width) / 2,
-        50,
+        (int)(50 * scale),
         texture_width,
         texture_height
     };
@@ -35,17 +40,20 @@ void render_section_label(SDL_Renderer* renderer, TTF_Font* font, const char* te
 void render_all_buttons(Options* options, SDL_Renderer* renderer) {
     if (!options || !renderer) return;
     
-    // Section labels with safe implementation
+    // Responsive section labels
     if (options->button_font) {
-        int window_width = 800; // Default fallback
-        SDL_GetRendererOutputSize(renderer, &window_width, NULL);
+        int window_width = 800, window_height = 600;
+        SDL_GetRendererOutputSize(renderer, &window_width, &window_height);
+        
+        float scale = (float)window_height / 720.0f;
         int center_x = window_width / 2;
-        int label_y = 95;
+        int label_y = (int)(95 * scale);
+        int label_spacing = (int)(140 * scale);
         
         render_section_label(renderer, options->button_font, "DISPLAY", center_x - 30, label_y);
-        render_section_label(renderer, options->button_font, "VIDEO", center_x - 25, label_y + 140);
-        render_section_label(renderer, options->button_font, "AUDIO", center_x - 25, label_y + 280);
-        render_section_label(renderer, options->button_font, "ACTIONS", center_x - 35, label_y + 480);
+        render_section_label(renderer, options->button_font, "VIDEO", center_x - 25, label_y + label_spacing);
+        render_section_label(renderer, options->button_font, "AUDIO", center_x - 25, label_y + label_spacing * 2);
+        render_section_label(renderer, options->button_font, "ACTIONS", center_x - 35, label_y + (int)(label_spacing * 3.4));
     }
     
     // Render buttons (excluding removed arrow buttons)
