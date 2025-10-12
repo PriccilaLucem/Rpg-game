@@ -20,6 +20,37 @@ ScreenResolution available_resolutions[] = {
     {1920, 1080},
 };
 
+LanguageOption available_languages[] = {
+    {"pt", "Português"},
+    {"en", "English"},
+};
+
+int current_language_index = 0;
+int num_languages = sizeof(available_languages) / sizeof(available_languages[0]);
+
+const char* available_language_codes[] = {
+    "en",
+    "pt"
+};
+
+const char* resolution_labels[] = {
+    "800x600",
+    "1280x720",
+    "1920x1080",
+};
+
+int is_valid_language_code(const char* lang_code) {
+    if (lang_code == NULL) return false;
+
+    size_t num_codes = sizeof(available_language_codes) / sizeof(available_language_codes[0]);
+    for (size_t i = 0; i < num_codes; i++) {
+        if (strcmp(lang_code, available_language_codes[i]) == 0) {
+            return 1; 
+        }
+    }
+    return 0; 
+}
+
 int current_resolution_index = 0;
 const int num_resolutions = sizeof(available_resolutions) / sizeof(available_resolutions[0]);
 
@@ -63,6 +94,25 @@ int find_current_resolution_index(int width, int height) {
     printf("Current resolution not found in available resolutions, defaulting to first option.\n");
     return 0;
 }
+static void update_screen_size_button_text(Options* options, SDL_Renderer* renderer) {
+    if (!options || !options->resolution_dropdown || !renderer) return;
+    
+    ScreenResolution res = available_resolutions[current_resolution_index];
+    snprintf(options->resolution_dropdown->text, MAX_INPUT_LENGTH, "%dx%d", res.width, res.height);
+    
+    // Update the dropdown button texture
+    if (options->resolution_dropdown->texture) {
+        SDL_DestroyTexture(options->resolution_dropdown->texture);
+        options->resolution_dropdown->texture = NULL;
+    }
+    
+    options->resolution_dropdown->texture = create_text_texture(
+        renderer,
+        options->button_font,
+        options->resolution_dropdown->text,
+        (SDL_Color){255, 255, 255, 255}
+    );
+}
 
 Options* init_options(int width, int height, SDL_Renderer* renderer, int font_size) {
     Options* options = malloc(sizeof(Options));
@@ -96,6 +146,12 @@ Options* init_options(int width, int height, SDL_Renderer* renderer, int font_si
     // Create title texture
     create_title_texture(options, renderer);
 
+    // Initialize dropdowns
+    options->resolution_dropdown = NULL;
+    options->language_dropdown = NULL;
+    init_resolution_dropdown(options);
+    init_language_dropdown(options);
+    
     // Initialize button textures and states
     initialize_buttons_textures(options);
     current_resolution_index = find_current_resolution_index(
@@ -116,9 +172,14 @@ void free_options(Options* options) {
     if (options->button_font) TTF_CloseFont(options->button_font);
     if (options->screen_title_font) TTF_CloseFont(options->screen_title_font);
 
+    // Free dropdowns
+    if (options->resolution_dropdown) free_button_dropdown(options->resolution_dropdown);
+    if (options->language_dropdown) free_button_dropdown(options->language_dropdown);
+    
     // Free buttons
+
+    
     Button* buttons[] = {
-        options->screen_size_left_arrow, options->screen_size_right_arrow, options->screen_size,
         options->full_screen, options->vsync, options->sound, options->volume,
         options->antialiasing, options->music_volume, options->effects_volume,
         options->voice_volume, options->save, options->reset,
@@ -308,32 +369,11 @@ void update_options(Options* options) {
     // Update button textures
     update_all_buttons_textures(options);
 }
-void update_screen_size_button_text(Options* options, SDL_Renderer* renderer) {
-    if (!options || !renderer) return;
+void update_resolution_dropdown_text(Options* options) {
+    if (!options || !options->resolution_dropdown) return;
     
     ScreenResolution res = available_resolutions[current_resolution_index];
-    char buffer[20];
-    snprintf(buffer, sizeof(buffer), "%dx%d", res.width, res.height);
-    strncpy(options->screen_size->label, buffer, MAX_BUTTON_LENGTH - 1);
-    options->screen_size->label[MAX_BUTTON_LENGTH - 1] = '\0';
-
-    update_button_texture(options->screen_size, renderer, options->button_font);
-}
-
-void screen_size_left_arrow_onClick(void* data) {
-    Options* options = (Options*)data;
-    if (!options) return;
-    
-    current_resolution_index = (current_resolution_index - 1 + num_resolutions) % num_resolutions;
-    update_screen_size_button_text(options, options->renderer);
-}
-
-void screen_size_right_arrow_onClick(void* data) {
-    Options* options = (Options*)data;
-    if (!options) return;
-    
-    current_resolution_index = (current_resolution_index + 1) % num_resolutions;
-    update_screen_size_button_text(options, options->renderer);
+    snprintf(options->resolution_dropdown->text, MAX_INPUT_LENGTH, "%dx%d", res.width, res.height);
 }
 
 void handle_options_input(SDL_Event* event, Options* options) {
@@ -349,6 +389,7 @@ void handle_options_input(SDL_Event* event, Options* options) {
 
         case SDL_MOUSEBUTTONDOWN:
             if (event->button.button == SDL_BUTTON_LEFT) {
+                handle_dropdown_click(options, mouse_x, mouse_y);
                 handle_mouse_click(options, mouse_x, mouse_y);
             }
             break;
@@ -366,8 +407,46 @@ void render_options(Options* options, SDL_Renderer* renderer) {
     // Render title
     render_title(options, renderer, current_width);
 
+    // Render dropdowns with comprehensive safety checks
+    if (options->resolution_dropdown && options->resolution_dropdown->font && 
+        options->resolution_dropdown->text && strlen(options->resolution_dropdown->text) > 0) {
+        render_button_dropdown(options->resolution_dropdown, renderer);
+        // Only render options when dropdown is active and has valid items
+        if (options->resolution_dropdown->isActive && options->resolution_dropdown->items && 
+            options->resolution_dropdown->itemCount > 0) {
+            render_button_dropdown_options(options->resolution_dropdown, renderer);
+        }
+    }
+    
+    if (options->language_dropdown && options->language_dropdown->font && 
+        options->language_dropdown->text && strlen(options->language_dropdown->text) > 0) {
+        render_button_dropdown(options->language_dropdown, renderer);
+        // Only render options when dropdown is active and has valid items
+        if (options->language_dropdown->isActive && options->language_dropdown->items && 
+            options->language_dropdown->itemCount > 0) {
+            render_button_dropdown_options(options->language_dropdown, renderer);
+        }
+    }
+
     // Render all buttons
     render_all_buttons(options, renderer);
+}
+
+void change_language(Options* options, const char* lang_code) {
+    if (!options || lang_code == NULL) return;
+    
+
+    // Update the language in the config
+    strncpy(options->config->language, lang_code, sizeof(options->config->language) - 1);
+    options->config->language[sizeof(options->config->language) - 1] = '\0';
+
+    // Save the config
+    save_config(options->config);
+
+    // Update the interface
+    update_options(options);
+    update_button_geometry(options, options->config->screen_width, options->config->screen_height);
+    printf("Language changed to %s\n", lang_code);
 }
 
 void update_button_geometry(Options* options, int screen_width, int screen_height) {

@@ -2,7 +2,7 @@
 #define CONSTANTS_H
 
 #define MENU_FONT_PATH "assets/fonts/Luckiest_Guy,Playfair_Display/Luckiest_Guy/LuckiestGuy-Regular.ttf"
-#define MAIN_CHARCATHER_OBJ "src/assets/player_assets/cube.obj"
+#define MAIN_CHARCATHER_OBJ "assets/player_assets/cube.obj"
 #define MAX_BUTTON_LENGTH 50
 #define NUM_RESOLUTIONS 6
 #define NUM_RESOLUTIONS 6
@@ -23,10 +23,6 @@ typedef enum {
     STATE_EXIT
 } GameState;
 
-typedef struct {
-    int width;
-    int height;
-    char* label;
-} ScreenResolution;
+
 
 #endif

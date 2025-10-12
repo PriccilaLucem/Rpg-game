@@ -1,22 +1,22 @@
 {
-  "options" : {
-    "BTN_FULLSCREEN": "TELA CHEIA: DESLIGADO",
-    "BTN_VSYNC": "VSYNC: DESLIGADO",
-    "BTN_SOUND": "SOM: LIGADO",
-    "BTN_VOLUME": "VOLUME: 100",
-    "BTN_ANTIALIASING": "ANTISSERRILHADO: LIGADO",
-    "BTN_MUSIC_VOLUME": "VOLUME MÚSICA: 0",
-    "BTN_EFFECTS_VOLUME": "VOLUME EFEITOS: 70",
-    "BTN_VOICE_VOLUME": "VOLUME VOZ: 75",
-    "BTN_SAVE": "SALVAR",
-    "BTN_RESET": "REDEFINIR PADRÃO",
-    "BTN_BACK": "VOLTAR AO MENU PRINCIPAL"
+  "options": {
+    "BTN_FULLSCREEN": "Tela Cheia",
+    "BTN_VSYNC": "VSync",
+    "BTN_SOUND": "Som",
+    "BTN_VOLUME": "Volume",
+    "BTN_ANTIALIASING": "Antialiasing",
+    "BTN_MUSIC_VOLUME": "Volume da Música",
+    "BTN_EFFECTS_VOLUME": "Volume dos Efeitos",
+    "BTN_VOICE_VOLUME": "Volume da Voz",
+    "BTN_SAVE": "Salvar",
+    "BTN_RESET": "Resetar",
+    "BTN_BACK": "Voltar"
   },
-
-  "main_menu":{
-    "START_GAME": "INICIAR JOGO",
-    "LOAD_GAME": "CARREGAR JOGO",
-    "OPTIONS": "OPÇÕES",
-    "EXIT": "SAIR"
+  "menu": {
+    "TITLE": "Menu Principal",
+    "START_GAME": "Iniciar Jogo",
+    "LOAD_GAME": "Carregar Jogo",
+    "OPTIONS": "Opções",
+    "EXIT": "Sair"
   }
 }

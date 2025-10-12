@@ -8,6 +8,29 @@
 #include <stdlib.h>
 #include "../../constants/constants.h"
 
+typedef struct dropdownItem{
+    char text[MAX_INPUT_LENGTH];
+    void (*onClick)(void* data);
+    char value[MAX_INPUT_LENGTH];
+} DropdownItem;
+
+typedef struct ButtonDropdown{
+
+    int x;
+    int y;
+    int width;
+    int height;
+    char text[MAX_INPUT_LENGTH];
+    bool isActive;
+    TTF_Font* font;
+    SDL_Color textColor;
+    SDL_Rect rect;
+    SDL_Texture* texture;
+    DropdownItem** items;
+    int itemCount;
+    DropdownItem* selectedItem;
+} ButtonDropdown;
+
 typedef struct {
    int x;
     int y;

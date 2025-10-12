@@ -80,6 +80,14 @@ Config* load_config(){
             if(*endptr == '\0' && parsed_value >= 0 && parsed_value <= 100) {
                 config->voice_volume = (int)parsed_value;
             }
+        } else if (strcmp(key, "font_size") == 0){
+            parsed_value = strtol(value, &endptr, 10);
+            if(*endptr == '\0' && parsed_value >= 8 && parsed_value <= 72) {
+                config->font_size = (int)parsed_value;
+            }
+        } else if (strcmp(key, "language") == 0) {
+            strncpy(config->language, value, sizeof(config->language) - 1);
+            config->language[sizeof(config->language) - 1] = '\0';
         }
     }
     fclose(file);

@@ -61,6 +61,10 @@ SRCS = $(SRC_DIR)/main.c \
        $(SRC_DIR)/ui/options/options_render.c \
        $(SRC_DIR)/ui/options/options_handlers.c \
        $(SRC_DIR)/ui/options/options_geometry.c \
+       $(SRC_DIR)/ui/options/options_dropdowns.c \
+       $(SRC_DIR)/ui/options/options_dropdown_handlers.c \
+       $(SRC_DIR)/ui/options/options_callbacks.c \
+       $(SRC_DIR)/ui/button/button_dropdown.c \
        $(SRC_DIR)/structs/charater/basic_charater.c \
        $(SRC_DIR)/structs/charater/main_charater.c \
        $(SRC_DIR)/game/init_game/init_game.c \
@@ -83,7 +87,7 @@ $(OBJ_DIR)/%.o: $(LIB_DIR)/%.c | $(OBJ_DIR)
 # =========================
 # REGRAS PRINCIPAIS
 # =========================
-all: download_cjson download_dlls $(TARGET)
+all: download_cjson download_dlls copy_dlls $(TARGET)
 
 $(TARGET): $(OBJS) | $(BIN_DIR)
 	$(CC) $(OBJS) -o $@ $(LDFLAGS)
@@ -144,7 +148,8 @@ download_dlls:
 	@curl -L https://www.dll-files.com/libfreetype-6.dll?download -o lib/libfreetype-6.dll
 
 	# Limpeza
-	@rm -rf sdl2.zip sdl2_ttf.zip sdl2_mixer.tar.gz SDL2_mixer-2.8.1
+	@rm -f sdl2.zip sdl2_ttf.zip sdl2_mixer.tar.gz 2>/dev/null || true
+	@rm -rf SDL2_mixer-2.8.1 2>/dev/null || true
 	@echo "✅ Todas as DLLs e bibliotecas SDL2 (x64) foram baixadas para lib/ e include/SDL2/"
 
 
@@ -159,18 +164,33 @@ copy_dlls: | $(BIN_DIR)
 # Limpeza
 # =========================
 clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR) $(LIB_DIR)/cJSON
+	@rm -rf $(OBJ_DIR) $(BIN_DIR) $(LIB_DIR)/cJSON 2>/dev/null || true
+	@rm -f *.zip *.tar.gz 2>/dev/null || true
 	@echo "🧹 Limpeza concluída!"
+
+# ========================
+# Build
+# =========================
+build: all copy_dlls
+
+# Build apenas compilação (sem downloads)
+compile: $(TARGET)
 
 # =========================
 # Rodar
 # =========================
-run: 
+run: $(TARGET)
+ifeq ($(UNAME_S),Linux)
 	@./$(TARGET)
+else ifeq ($(UNAME_S),Darwin)
+	@./$(TARGET)
+else
+	@.\\$(TARGET)
+endif
 
 rebuild: clean all run
 
 # =========================
 # PHONY
 # =========================
-.PHONY: all clean run rebuild copy_dlls download_dlls download_cjson
+.PHONY: all clean run rebuild copy_dlls download_dlls download_cjson compile build
