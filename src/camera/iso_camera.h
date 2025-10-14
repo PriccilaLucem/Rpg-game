@@ -3,7 +3,7 @@
 
 #include <SDL.h>
 #include <math.h>
-#include "../../load_obj/load_obj.h"
+#include "../load_obj/load_obj.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

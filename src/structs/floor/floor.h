@@ -4,7 +4,7 @@
 #include <SDL.h>
 #include <stdlib.h>
 #include "../../load_obj/load_obj.h"
-#include "../iso_camera/iso_camera.h"
+#include "../../camera/iso_camera.h"
 #include "../../load_obj/load_obj.h"
 
 

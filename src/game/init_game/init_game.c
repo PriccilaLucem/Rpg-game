@@ -1,26 +1,6 @@
 #include "./init_game.h"
-void HandleCharacterInput(MainCharater* character, const Uint8* keyboard_state) {
-    if (!character) return;
-    
-    float move_speed = 5.0f;
-    
-    // Salvar posição anterior para possível colisão
-    float old_x = character->bc->position_x;
-    float old_z = character->bc->position_z;
-    
-    if (keyboard_state[SDL_SCANCODE_UP]) {
-        character->bc->position_z -= move_speed;
-    }
-    if (keyboard_state[SDL_SCANCODE_DOWN]) {
-        character->bc->position_z += move_speed;
-    }
-    if (keyboard_state[SDL_SCANCODE_LEFT]) {
-        character->bc->position_x -= move_speed;
-    }
-    if (keyboard_state[SDL_SCANCODE_RIGHT]) {
-        character->bc->position_x += move_speed;
-    }
-}
+#include "../../input/charater_input.h"
+
 void render_initial_game(SDL_Renderer* renderer, MainCharater* main_charater, Floor* floor) {
     if (!floor) return;
 
@@ -49,13 +29,33 @@ void render_initial_game(SDL_Renderer* renderer, MainCharater* main_charater, Fl
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    // Renderizar o chão
+    // Renderizar os chãos
     if (floor->obj) {
+        // Floor principal
         floor->obj->scale = 200;
         floor->obj->position_x = 0;
         floor->obj->position_y = 0;
         floor->obj->position_z = 0;
         OBJ_Render_Isometric(renderer, floor->obj, &cam);
+        
+        // Floor 2
+        floor->obj->position_x = 400;
+        floor->obj->position_y = 0;
+        OBJ_Render_Isometric(renderer, floor->obj, &cam);
+        
+        // Floor 3
+        floor->obj->position_x = 0;
+        floor->obj->position_y = 400;
+        OBJ_Render_Isometric(renderer, floor->obj, &cam);
+    }
+    
+    // Renderizar a casa
+    static House* game_house = NULL;
+    if (!game_house) {
+        game_house = init_house("assets/home/Untitled.obj", 200.0f, 200, 200, 0, (SDL_Color){120, 80, 40, 255});
+    }
+    if (game_house && game_house->model) {
+        OBJ_Render_Isometric(renderer, game_house->model, &cam);
     }
     
     // Renderizar o personagem

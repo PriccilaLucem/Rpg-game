@@ -65,12 +65,14 @@ SRCS = $(SRC_DIR)/main.c \
        $(SRC_DIR)/ui/options/options_dropdown_handlers.c \
        $(SRC_DIR)/ui/options/options_callbacks.c \
        $(SRC_DIR)/ui/button/button_dropdown.c \
+       $(SRC_DIR)/structs/floor/floor.c \
+       $(SRC_DIR)/structs/house/house.c \
+       $(SRC_DIR)/input/charater_input.c \
        $(SRC_DIR)/structs/charater/basic_charater.c \
        $(SRC_DIR)/structs/charater/main_charater.c \
        $(SRC_DIR)/game/init_game/init_game.c \
        $(SRC_DIR)/game/ui/charater_build.c \
-       $(SRC_DIR)/game/floor/floor.c \
-       $(SRC_DIR)/game/iso_camera/iso_camera.c \
+       $(SRC_DIR)/camera/iso_camera.c \
        $(SRC_DIR)/game/game.c \
        $(SRC_DIR)/game/physics/physics.c \
        $(LIB_DIR)/cJSON/cJSON.c \
