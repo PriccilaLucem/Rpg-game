@@ -8,37 +8,36 @@ void IsoCamera_Init(IsoCamera* cam, float x, float y, float z) {
     cam->y = y;
     cam->z = z;
     cam->zoom = 1.0f;
-    cam->rotation = 45.0f * (M_PI / 180.0f); // 45 graus em radianos
-    cam->tilt = 35.264f * (M_PI / 180.0f);   // ângulo clássico de isometria
+    cam->angle = 45.0f;
+    cam->elevation = 30.0f;
 }
 
 // Converte coordenadas 3D -> 2D com projeção isométrica
-SDL_Point WorldToScreen(float world_x, float world_y, float world_z, IsoCamera* cam) {
+void WorldToScreen(IsoCamera* cam, float world_x, float world_y, float world_z, int* sx, int* sy, int screen_width, int screen_height) {
     // --- Translação pela câmera ---
     float dx = world_x - cam->x;
     float dy = world_y - cam->y;
     float dz = world_z - cam->z;
 
     // --- Rotação horizontal (em torno do eixo Y) ---
-    float cosR = cosf(cam->rotation);
-    float sinR = sinf(cam->rotation);
+    float angle_rad = cam->angle * M_PI / 180.0f;
+    float cosR = cosf(angle_rad);
+    float sinR = sinf(angle_rad);
 
     float rx = dx * cosR - dz * sinR;
     float rz = dx * sinR + dz * cosR;
 
     // --- Projeção isométrica clássica ---
-    // usa ângulo de 35.264° (tilt padrão), mas de forma estável
-    float cosT = cosf(cam->tilt);
-    float sinT = sinf(cam->tilt);
+    float elevation_rad = cam->elevation * M_PI / 180.0f;
+    float cosT = cosf(elevation_rad);
+    float sinT = sinf(elevation_rad);
 
     float iso_x = (rx - rz) * cosT * cam->zoom;
-    float iso_y = (rx + rz) * sinT - dy * cam->zoom;
+    float iso_y = ((rx + rz) * sinT - dy) * cam->zoom;
 
-    // --- Centraliza na tela (ajuste conforme resolução) ---
-    SDL_Point screen;
-    screen.x = (int)(iso_x + 640);  // metade da largura
-    screen.y = (int)(iso_y + 360);  // metade da altura
-    return screen;
+    // --- Centraliza na tela ---
+    *sx = (int)(iso_x + screen_width / 2);
+    *sy = (int)(iso_y + screen_height / 2);
 }
 
 
@@ -72,43 +71,30 @@ void OBJ_Render_Isometric(SDL_Renderer* renderer, OBJ_Model* model, IsoCamera* c
         }
 
         // Converte para coordenadas de tela usando a câmera isométrica
-        SDL_Point p1 = WorldToScreen(v[0].x, v[0].y, v[0].z, cam);
-        SDL_Point p2 = WorldToScreen(v[1].x, v[1].y, v[1].z, cam);
-        SDL_Point p3 = WorldToScreen(v[2].x, v[2].y, v[2].z, cam);
-
+        int sx[3], sy[3];
+        WorldToScreen(cam, v[0].x, v[0].y, v[0].z, &sx[0], &sy[0], screen_width, screen_height);
+        WorldToScreen(cam, v[1].x, v[1].y, v[1].z, &sx[1], &sy[1], screen_width, screen_height);
+        WorldToScreen(cam, v[2].x, v[2].y, v[2].z, &sx[2], &sy[2], screen_width, screen_height);
 
         // Desenha arestas
-        SDL_RenderDrawLine(renderer, p1.x, p1.y, p2.x, p2.y);
-        SDL_RenderDrawLine(renderer, p2.x, p2.y, p3.x, p3.y);
-        SDL_RenderDrawLine(renderer, p3.x, p3.y, p1.x, p1.y);
+        SDL_RenderDrawLine(renderer, sx[0], sy[0], sx[1], sy[1]);
+        SDL_RenderDrawLine(renderer, sx[1], sy[1], sx[2], sy[2]);
+        SDL_RenderDrawLine(renderer, sx[2], sy[2], sx[0], sy[0]);
     }
 }
 
-// Controle da câmera via teclado
+// Controle da câmera via teclado (apenas rotação)
 void HandleCameraInput(IsoCamera* cam, const Uint8* keyboard_state) {
-    float move_speed = 10.0f;
-    float angle_rad = cam->rotation; // usa o mesmo ângulo da projeção
+    if (keyboard_state[SDL_SCANCODE_Q]) cam->angle += 2.0f;
+    if (keyboard_state[SDL_SCANCODE_E]) cam->angle -= 2.0f;
+    
+    if (keyboard_state[SDL_SCANCODE_R]) cam->zoom *= 1.05f;
+    if (keyboard_state[SDL_SCANCODE_F]) cam->zoom *= 0.95f;
+}
 
-    if (keyboard_state[SDL_SCANCODE_W]) {
-        cam->x += cosf(angle_rad) * move_speed;
-        cam->z += sinf(angle_rad) * move_speed;
-    }
-    if (keyboard_state[SDL_SCANCODE_S]) {
-        cam->x -= cosf(angle_rad) * move_speed;
-        cam->z -= sinf(angle_rad) * move_speed;
-    }
-    if (keyboard_state[SDL_SCANCODE_A]) {
-        cam->x += sinf(angle_rad) * move_speed;
-        cam->z -= cosf(angle_rad) * move_speed;
-    }
-    if (keyboard_state[SDL_SCANCODE_D]) {
-        cam->x -= sinf(angle_rad) * move_speed;
-        cam->z += cosf(angle_rad) * move_speed;
-    }
-
-    if (keyboard_state[SDL_SCANCODE_Q]) cam->zoom *= 1.05f;
-    if (keyboard_state[SDL_SCANCODE_E]) cam->zoom *= 0.95f;
-
-    if (keyboard_state[SDL_SCANCODE_R]) cam->rotation += 0.05f;
-    if (keyboard_state[SDL_SCANCODE_F]) cam->rotation -= 0.05f;
+// Função para câmera seguir personagem
+void FollowCharacter(IsoCamera* cam, float char_x, float char_y, float char_z) {
+    cam->x = char_x;
+    cam->y = char_y;
+    cam->z = char_z;
 }

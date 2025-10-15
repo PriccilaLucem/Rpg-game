@@ -28,6 +28,9 @@ void render_initial_game(SDL_Renderer* renderer, MainCharater* main_charater, Fl
         main_charater->bc->position_y += main_charater->bc->velocity_y;
 
         ApplyFloorPhysics(main_charater);
+        
+        // Câmera segue personagem
+        FollowCharacter(&cam, main_charater->bc->position_x, main_charater->bc->position_y, main_charater->bc->position_z);
     }
 
     // Limpa tela
