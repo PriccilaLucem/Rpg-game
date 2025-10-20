@@ -1,5 +1,86 @@
 #include "./load_obj.h"
 
+static Vertex rotateVertex(Vertex v, float rx, float ry, float rz) {
+    // Rotate around X axis
+    float cos_x = cosf(rx), sin_x = sinf(rx);
+    float y = v.y * cos_x - v.z * sin_x;
+    float z = v.y * sin_x + v.z * cos_x;
+    v.y = y; v.z = z;
+    
+    // Rotate around Y axis
+    float cos_y = cosf(ry), sin_y = sinf(ry);
+    float x = v.x * cos_y + v.z * sin_y;
+    z = -v.x * sin_y + v.z * cos_y;
+    v.x = x; v.z = z;
+    
+    // Rotate around Z axis
+    float cos_z = cosf(rz), sin_z = sinf(rz);
+    x = v.x * cos_z - v.y * sin_z;
+    y = v.x * sin_z + v.y * cos_z;
+    v.x = x; v.y = y;
+    
+    return v;
+}
+
+static Vertex translateVertex(Vertex v, float dx, float dy, float dz) {
+    v.x += dx; v.y += dy; v.z += dz;
+    return v;
+}
+
+static Vertex scaleVertex(Vertex v, float scale) {
+    v.x *= scale; v.y *= scale; v.z *= scale;
+    return v;
+}
+
+static Vertex toScreen(Vertex v) {
+    // Simple perspective projection with safety checks
+    float fov = 500.0f;
+    if (v.z > 0.1f) {
+        v.x = (v.x * fov) / v.z + 400; // Screen center X
+        v.y = (v.y * fov) / v.z + 300; // Screen center Y
+    } else {
+        // Clamp vertices behind camera
+        v.x = 400; v.y = 300;
+    }
+    
+    // Clamp to reasonable screen bounds
+    if (v.x < -1000) v.x = -1000;
+    if (v.x > 2000) v.x = 2000;
+    if (v.y < -1000) v.y = -1000;
+    if (v.y > 2000) v.y = 2000;
+    
+    return v;
+}
+
+static void fillTriangle(SDL_Renderer* renderer, int x1, int y1, int x2, int y2, int x3, int y3) {
+    // Sort vertices by y coordinate
+    if (y1 > y2) { int tx = x1, ty = y1; x1 = x2; y1 = y2; x2 = tx; y2 = ty; }
+    if (y2 > y3) { int tx = x2, ty = y2; x2 = x3; y2 = y3; x3 = tx; y3 = ty; }
+    if (y1 > y2) { int tx = x1, ty = y1; x1 = x2; y1 = y2; x2 = tx; y2 = ty; }
+    
+    // Fill triangle using scanline algorithm
+    for (int y = y1; y <= y3; y++) {
+        int xa, xb;
+        
+        if (y < y2) {
+            // Upper part
+            if (y2 != y1) xa = x1 + (x2 - x1) * (y - y1) / (y2 - y1);
+            else xa = x1;
+            if (y3 != y1) xb = x1 + (x3 - x1) * (y - y1) / (y3 - y1);
+            else xb = x1;
+        } else {
+            // Lower part
+            if (y3 != y2) xa = x2 + (x3 - x2) * (y - y2) / (y3 - y2);
+            else xa = x2;
+            if (y3 != y1) xb = x1 + (x3 - x1) * (y - y1) / (y3 - y1);
+            else xb = x1;
+        }
+        
+        if (xa > xb) { int temp = xa; xa = xb; xb = temp; }
+        SDL_RenderDrawLine(renderer, xa, y, xb, y);
+    }
+}
+
 
 OBJ_Model* OBJ_Load(const char* filename) {
     FILE* file = fopen(filename, "r");
@@ -120,77 +201,62 @@ OBJ_Model* OBJ_Load(const char* filename) {
 
 
 
-void OBJ_Render(SDL_Renderer* renderer, OBJ_Model* model) {
+void OBJ_Render(SDL_Renderer* renderer, OBJ_Model* model, float camera_x, float camera_y, float camera_z) {
     if (!model || !renderer || !model->vertices || model->vertex_count <= 0) return;
-
-    int screen_width, screen_height;
-    SDL_GetWindowSize(window, &screen_width, &screen_height);
-
-    // White color for debugging
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
-    float fov = 60.0f;
-    float aspect_ratio = (float)screen_width / (float)screen_height;
-    float fov_rad = 1.0f / tanf(fov * 0.5f * M_PI / 180.0f);
-
+    
     for (int i = 0; i < model->face_count; i++) {
         Face face = model->faces[i];
+        if (face.v1 >= model->vertex_count || face.v2 >= model->vertex_count || face.v3 >= model->vertex_count) continue;
+        
+        Vertex v1 = model->vertices[face.v1];
+        Vertex v2 = model->vertices[face.v2];
+        Vertex v3 = model->vertices[face.v3];
 
-        // Validate vertex indices
-        if (face.v1 < 0 || face.v1 >= model->vertex_count ||
-            face.v2 < 0 || face.v2 >= model->vertex_count ||
-            face.v3 < 0 || face.v3 >= model->vertex_count) {
-            continue;
-        }
+        // Apply transformations
+        v1 = rotateVertex(v1, model->rotation_x, model->rotation_y, model->rotation_z);
+        v2 = rotateVertex(v2, model->rotation_x, model->rotation_y, model->rotation_z);
+        v3 = rotateVertex(v3, model->rotation_x, model->rotation_y, model->rotation_z);
 
-        Vertex v[3];
-        v[0] = model->vertices[face.v1];
-        v[1] = model->vertices[face.v2];
-        v[2] = model->vertices[face.v3];
+        v1 = translateVertex(v1, model->position_x, model->position_y, model->position_z);
+        v2 = translateVertex(v2, model->position_x, model->position_y, model->position_z);
+        v3 = translateVertex(v3, model->position_x, model->position_y, model->position_z);
 
-        // Apply scale and position
-        for (int j = 0; j < 3; j++) {
-            v[j].x = v[j].x * model->scale + model->position_x;
-            v[j].y = v[j].y * model->scale + model->position_y;
-            v[j].z = v[j].z * model->scale + model->position_z;
-        }
+        v1 = scaleVertex(v1, model->scale);
+        v2 = scaleVertex(v2, model->scale);
+        v3 = scaleVertex(v3, model->scale);
 
-        // Project vertices to screen space
-        Vertex p[3];
-        for (int j = 0; j < 3; j++) {
-            // Avoid division by zero with a small epsilon
-            float z = (fabs(v[j].z) < 0.001f) ? 0.001f : v[j].z;
-            
-            // Perspective projection
-            p[j].x = (v[j].x * fov_rad * aspect_ratio) / z;
-            p[j].y = (v[j].y * fov_rad) / z;
-            
-            // Convert to screen coordinates
-            p[j].x = (p[j].x + 1.0f) * 0.5f * screen_width;
-            p[j].y = (1.0f - p[j].y) * 0.5f * screen_height;
-        }
+        // Apply camera transformation
+        v1 = translateVertex(v1, -camera_x, -camera_y, -camera_z);
+        v2 = translateVertex(v2, -camera_x, -camera_y, -camera_z);
+        v3 = translateVertex(v3, -camera_x, -camera_y, -camera_z);
 
-        // Draw the triangle edges
-        SDL_RenderDrawLine(renderer, (int)p[0].x, (int)p[0].y, (int)p[1].x, (int)p[1].y);
-        SDL_RenderDrawLine(renderer, (int)p[1].x, (int)p[1].y, (int)p[2].x, (int)p[2].y);
-        SDL_RenderDrawLine(renderer, (int)p[2].x, (int)p[2].y, (int)p[0].x, (int)p[0].y);
+        // Skip faces behind camera
+        if (v1.z <= 0 && v2.z <= 0 && v3.z <= 0) continue;
+
+        // Convert to screen coordinates
+        v1 = toScreen(v1);
+        v2 = toScreen(v2);
+        v3 = toScreen(v3);
+
+        // Simple lighting based on face orientation
+        float light = 0.5f + 0.5f * ((v2.x - v1.x) * (v3.y - v1.y) - (v2.y - v1.y) * (v3.x - v1.x)) / 10000.0f;
+        light = fmaxf(0.3f, fminf(1.0f, light));
+        
+        // Apply lighting to color
+        Uint8 r = (Uint8)(model->color.r * light);
+        Uint8 g = (Uint8)(model->color.g * light);
+        Uint8 b = (Uint8)(model->color.b * light);
+        
+        // Fill triangle
+        SDL_SetRenderDrawColor(renderer, r, g, b, model->color.a);
+        fillTriangle(renderer, (int)v1.x, (int)v1.y, (int)v2.x, (int)v2.y, (int)v3.x, (int)v3.y);
+        
+        // Draw wireframe
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderDrawLine(renderer, (int)v1.x, (int)v1.y, (int)v2.x, (int)v2.y);
+        SDL_RenderDrawLine(renderer, (int)v2.x, (int)v2.y, (int)v3.x, (int)v3.y);
+        SDL_RenderDrawLine(renderer, (int)v3.x, (int)v3.y, (int)v1.x, (int)v1.y);
     }
-}
-Vertex project_vertex(Vertex v, int screen_width, int screen_height, float fov_rad, float aspect_ratio) {
-    Vertex out;
-
-    // Protege contra divisão por 0
-    if (v.z <= 0.1f) v.z = 0.1f;
-
-    out.x = (v.x * fov_rad * aspect_ratio) / v.z;
-    out.y = (v.y * fov_rad) / v.z;
-    out.z = v.z;
-
-    // Converte para coordenadas de tela
-    out.x = (out.x + 1.0f) * 0.5f * screen_width;
-    out.y = (1.0f - out.y) * 0.5f * screen_height;
-
-    return out;
 }
 
 void OBJ_Rotate(OBJ_Model* model, float dx, float dy, float dz) {
@@ -220,20 +286,7 @@ void OBJ_SetColor(OBJ_Model* model, SDL_Color color) {
         model->color = color;
     }
 }
-SDL_Rect toRect(const OBJ_Model* model){
-    SDL_Rect rect;
-    int screen_width, screen_height;
-    SDL_GetWindowSize(window, &screen_width, &screen_height);
 
-    rect.x = (int)(model->position_x - model->scale/2);
-    rect.y = (int)(model->position_y - model->scale/2);
-    rect.w = (int) model->scale;
-    rect.h = (int) model->scale;
-    rect.x += screen_width/2;
-    rect.y += screen_height/2;
-
-    return rect;   
-}
 
 void OBJ_Free(OBJ_Model* model) {
     if (model) {

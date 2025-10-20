@@ -46,10 +46,14 @@ Floor* init_floor_from_obj(SDL_Renderer* renderer, const char* path, int tile_wi
         exit(EXIT_FAILURE);
     }
 
-    SDL_Rect bounds = toRect(model);
-
-    floor->width  = bounds.w / tile_width;
-    floor->height = bounds.h / tile_height;
+    // Calculate floor dimensions based on model scale
+    int floor_size = (int)(model->scale * 10); // Arbitrary scaling
+    floor->width  = floor_size / tile_width;
+    floor->height = floor_size / tile_height;
+    
+    // Ensure minimum size
+    if (floor->width < 10) floor->width = 10;
+    if (floor->height < 10) floor->height = 10;
 
     floor->tiles = malloc(floor->width * sizeof(SDL_Texture**));
     for (int x = 0; x < floor->width; x++) {

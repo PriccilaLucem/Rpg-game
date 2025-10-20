@@ -3,7 +3,7 @@
 
 #include <SDL.h>
 #include <math.h>
-#include "../../load_obj/load_obj.h"
+#include "../load_obj/load_obj.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -17,16 +17,10 @@ typedef struct {
     float elevation;     // Altura/ângulo de elevação
 } IsoCamera;
 
-// Inicialização da câmera
 void IsoCamera_Init(IsoCamera* cam, float x, float y, float z);
-
-// Converte coordenadas 3D do mundo para coordenadas 2D de tela
-void WorldToScreen(IsoCamera* cam, float wx, float wy, float wz, int* sx, int* sy, int screen_width, int screen_height);
-
-// Função para renderizar objetos com a câmera isométrica
+void WorldToScreen(IsoCamera* cam, float world_x, float world_y, float world_z, int* sx, int* sy, int screen_width, int screen_height);
 void OBJ_Render_Isometric(SDL_Renderer* renderer, OBJ_Model* model, IsoCamera* cam);
-
-// Função para manipular a câmera (input do usuário)
 void HandleCameraInput(IsoCamera* cam, const Uint8* keyboard_state);
+void FollowCharacter(IsoCamera* cam, float char_x, float char_y, float char_z);
 
 #endif
