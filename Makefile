@@ -40,7 +40,11 @@ else ifeq ($(UNAME_S),Darwin)
     TARGET = $(BIN_DIR)/game
     HOMEBREW := $(shell which brew)
     CFLAGS += -I/usr/local/include/SDL2 -I/opt/homebrew/include/SDL2
-    LDFLAGS = -L/usr/local/lib -L/opt/homebrew/lib -lSDL2 -lSDL2_ttf -lSDL2_mixer
+    CFLAGS += -I/usr/local/include -I/opt/homebrew/include
+    CFLAGS += -I/opt/homebrew/Cellar/cjson/1.7.19/include
+    LDFLAGS = -L/usr/local/lib -L/opt/homebrew/lib
+    LDFLAGS += -L/opt/homebrew/Cellar/cjson/1.7.19/lib
+    LDFLAGS += -lSDL2 -lSDL2_ttf -lSDL2_mixer -lcjson
 else
     TARGET = $(BIN_DIR)/game.exe
     LDFLAGS = -Llib -lSDL2 -lSDL2_ttf -lSDL2_mixer
@@ -73,9 +77,15 @@ SRCS = $(SRC_DIR)/main.c \
        $(SRC_DIR)/game/iso_camera/iso_camera.c \
        $(SRC_DIR)/game/game.c \
        $(SRC_DIR)/game/physics/physics.c \
-       $(LIB_DIR)/cJSON/cJSON.c \
 	   $(SRC_DIR)/lang/language.c \
 	   $(SRC_DIR)/json_loader/json_loader.c
+
+# Adicionar cJSON.c apenas no Windows
+ifneq ($(UNAME_S),Darwin)
+ifneq ($(UNAME_S),Linux)
+    SRCS += $(LIB_DIR)/cJSON/cJSON.c
+endif
+endif
 
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(filter $(SRC_DIR)/%,$(SRCS))) \
         $(patsubst $(LIB_DIR)/%.c,$(OBJ_DIR)/%.o,$(filter $(LIB_DIR)/%,$(SRCS)))
@@ -87,7 +97,11 @@ $(OBJ_DIR)/%.o: $(LIB_DIR)/%.c | $(OBJ_DIR)
 # =========================
 # REGRAS PRINCIPAIS
 # =========================
+ifeq ($(UNAME_S),Darwin)
+all: install_deps_mac $(TARGET)
+else
 all: download_cjson download_dlls copy_dlls $(TARGET)
+endif
 
 $(TARGET): $(OBJS) | $(BIN_DIR)
 	$(CC) $(OBJS) -o $@ $(LDFLAGS)
@@ -101,6 +115,18 @@ $(OBJ_DIR):
 
 $(BIN_DIR):
 	@mkdir -p $(BIN_DIR)
+
+# =========================
+# INSTALAÇÃO DE DEPENDÊNCIAS macOS
+# =========================
+install_deps_mac:
+	@if [ -z "$(HOMEBREW)" ]; then \
+		echo "Homebrew não encontrado. Instalando Homebrew..."; \
+		/bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; \
+	fi
+	@echo "Instalando dependências via Homebrew..."
+	@brew install sdl2 sdl2_ttf sdl2_mixer cjson || brew upgrade sdl2 sdl2_ttf sdl2_mixer cjson
+	@echo "✅ Dependências instaladas com sucesso!"
 
 # =========================
 # DOWNLOAD AUTOMÁTICO DO cJSON (Windows)
